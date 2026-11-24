@@ -5,9 +5,12 @@ signal endurance_modifiee(actuelle: float, maximum: float)
 signal qi_modifie(actuel: float, maximum: float)
 signal royaume_modifie(nouveau_royaume: int)
 
-# --- PARAMÈTRES DE DÉPLACEMENT ---
-@export_group("Mouvement")
+# --- PARAMÈTRES DE DÉPLACEMENT & INERTIE ---
+@export_group("Mouvement & Inertie")
 @export var vitesse : float = 6.0
+@export var acceleration : float = 38.0           # Vitesse à laquelle le personnage atteint sa vitesse max
+@export var friction : float = 32.0               # Vitesse de freinage (empêche les arrêts secs)
+@export var vitesse_rotation_pivot : float = 12.0 # Vitesse de pivotement (plus bas = virages plus lourds)
 @export var force_saut : float = 5.5
 
 # --- PARAMÈTRES DU DASH ---
@@ -19,22 +22,26 @@ signal royaume_modifie(nouveau_royaume: int)
 @export var fenetre_double_tap : float = 0.25
 @export var cout_endurance_base : float = 15.0
 
-# --- PARAMÈTRES D'ATTAQUE & COUNTER ---
+# --- PARAMÈTRES D'ATTAQUE, COUNTER & AIM ASSIST ---
 @export_group("Attaque, Parade & Counter")
 @export var degats_base : float = 20.0
 @export var degats_poise_base : float = 25.0
 @export var cout_endurance_attaque : float = 8.0
-@export var duree_attaque : float = 0.26          # Engagement (commitment) d'un coup normal
+@export var duree_attaque : float = 0.26
 @export var fenetre_combo : float = 0.8
 
-@export var fenetre_parry_permissive : float = 0.32 # Fenêtre généreuse façon Sekiro
-@export var fenetre_counter_swbf2 : float = 0.45    # Fenêtre après un blocage pour déclencher le counter
-@export var duree_counter_rapide : float = 0.11     # Engagement très court sur un Counter SWBF2
+@export var fenetre_parry_permissive : float = 0.32
+@export var fenetre_counter_swbf2 : float = 0.45
+@export var duree_counter_rapide : float = 0.11
 @export var degats_poise_parry : float = 45.0
 
-@export var impulsion_attaque : float = 5.5       # Élan vers l'avant lors d'un coup
-@export var impulsion_finisher : float = 8.5      # Élan plus prononcé sur le 3ème coup
-@export var impulsion_counter : float = 2.5       # Faible déplacement sur un Counter
+@export var impulsion_attaque : float = 5.5
+@export var impulsion_finisher : float = 8.5
+@export var impulsion_counter : float = 2.5
+
+@export_group("Aim Assist (Soft-Lock)")
+@export var portee_aim_assist : float = 4.5       # Distance max pour attirer légèrement l'attaque
+@export var angle_max_aim_assist_deg : float = 50.0 # Angle max de correction automatique (en degrés)
 
 # --- STATISTIQUES DE CULTIVATION ---
 @export_group("Cultivation & Combat")
@@ -115,7 +122,6 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity.y -= gravite * delta
 
-	# Si garde brisée, le joueur est brièvement étourdi
 	if est_brise:
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
@@ -138,7 +144,7 @@ func _physics_process(delta: float) -> void:
 			visuel_garde.visible = false
 			tenter_attaque()
 
-	# 6. Mouvement (Priorité : Dash > Engagement d'attaque > Déplacement libre)
+	# 6. Mouvement (Priorité : Dash > Engagement d'attaque > Déplacement avec inertie)
 	if est_en_dash:
 		velocity.x = direction_dash.x * vitesse_dash
 		velocity.z = direction_dash.z * vitesse_dash
@@ -146,7 +152,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, 22.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 22.0 * delta)
 	else:
-		gerer_deplacement_normal()
+		gerer_deplacement_normal(delta)
 
 	move_and_slide()
 
@@ -170,27 +176,66 @@ func flash_fenetre_parry() -> void:
 		if est_en_garde and mat:
 			mat.albedo_color = Color(0.95, 0.77, 0.06, 0.45)
 
-func gerer_deplacement_normal() -> void:
+func gerer_deplacement_normal(delta: float) -> void:
 	if Input.is_action_just_pressed("sauter") and is_on_floor():
 		velocity.y = force_saut
 
 	var input_dir := Input.get_vector("gauche", "droite", "avancer", "reculer")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	var vitesse_effective : float = vitesse * 0.55 if est_en_garde else vitesse
+	var vitesse_cible_max : float = vitesse * 0.55 if est_en_garde else vitesse
 	
 	if direction:
-		velocity.x = direction.x * vitesse_effective
-		velocity.z = direction.z * vitesse_effective
+		# Accélération progressive au lieu d'un changement instantané de vélocité
+		velocity.x = move_toward(velocity.x, direction.x * vitesse_cible_max, acceleration * delta)
+		velocity.z = move_toward(velocity.z, direction.z * vitesse_cible_max, acceleration * delta)
 		
-		pivot_attaque.look_at(pivot_attaque.global_position + direction, Vector3.UP)
+		# Rotation progressive du PivotAttaque (turn rate)
+		var angle_cible : float = atan2(-direction.x, -direction.z)
+		pivot_attaque.rotation.y = lerp_angle(pivot_attaque.rotation.y, angle_cible, vitesse_rotation_pivot * delta)
 		
 		var sprite := get_node_or_null("Sprite3D")
 		if sprite and input_dir.x != 0:
 			sprite.flip_h = input_dir.x < 0
 	else:
-		velocity.x = move_toward(velocity.x, 0, vitesse_effective)
-		velocity.z = move_toward(velocity.z, 0, vitesse_effective)
+		# Décélération progressive par friction au sol
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+
+# --- SOFT-LOCK / AIM ASSIST LÉGER VERS L'ENNEMI LE PLUS PROCHE ---
+func orienter_legerement_vers_ennemi_proche() -> void:
+	var ennemis : Array = get_tree().get_nodes_in_group("ennemis")
+	if ennemis.is_empty():
+		return
+
+	var ennemi_plus_proche : Node3D = null
+	var distance_min : float = portee_aim_assist
+	var direction_actuelle : Vector3 = -pivot_attaque.global_transform.basis.z.normalized()
+
+	for ennemi in ennemis:
+		if not is_instance_valid(ennemi) or not (ennemi is Node3D):
+			continue
+		var vers_ennemi : Vector3 = ennemi.global_position - global_position
+		vers_ennemi.y = 0.0
+		var dist : float = vers_ennemi.length()
+		
+		if dist <= distance_min and dist > 0.1:
+			var angle_ecart : float = rad_to_deg(direction_actuelle.angle_to(vers_ennemi.normalized()))
+			# On n'assiste que si l'ennemi est globalement devant ou sur le flanc (dans le cône défini)
+			if angle_ecart <= angle_max_aim_assist_deg:
+				distance_min = dist
+				ennemi_plus_proche = ennemi
+
+	if ennemi_plus_proche:
+		var dir_cible : Vector3 = (ennemi_plus_proche.global_position - global_position).normalized()
+		dir_cible.y = 0.0
+		var angle_cible : float = atan2(-dir_cible.x, -dir_cible.z)
+		# Correction fluide (65% vers l'ennemi pour assister sans forcer brutalement)
+		pivot_attaque.rotation.y = lerp_angle(pivot_attaque.rotation.y, angle_cible, 0.65)
+		
+		var sprite := get_node_or_null("Sprite3D")
+		if sprite and abs(dir_cible.x) > 0.15:
+			sprite.flip_h = dir_cible.x < 0
 
 func verifier_double_tap() -> void:
 	var temps_actuel : float = Time.get_ticks_msec() / 1000.0
@@ -240,6 +285,9 @@ func tenter_dash(dir: Vector3) -> void:
 	peut_dash = false
 	direction_dash = dir
 	
+	# Le pivot s'aligne immédiatement avec la direction du dash
+	pivot_attaque.rotation.y = atan2(-dir.x, -dir.z)
+	
 	est_invulnerable = true
 	reduction_degats = 0.75
 	poise_actuelle = poise_base * 2.5
@@ -277,7 +325,9 @@ func tenter_attaque() -> void:
 	est_en_counter = false
 	cibles_touchees_coup_actuel.clear()
 
-	# Verrouille la direction du coup et applique l'impulsion vers l'avant
+	# Ajuste légèrement l'orientation vers l'ennemi proche avant de verrouiller le coup
+	orienter_legerement_vers_ennemi_proche()
+
 	direction_attaque_verrouillee = -pivot_attaque.global_transform.basis.z.normalized()
 	var elan : float = impulsion_finisher if index_combo == 3 else impulsion_attaque
 	velocity.x = direction_attaque_verrouillee.x * elan
@@ -300,6 +350,9 @@ func declencher_counter_swbf2() -> void:
 	est_en_attaque = true
 	est_en_counter = true
 	cibles_touchees_coup_actuel.clear()
+
+	# Oriente légèrement le counter vers l'attaquant proche
+	orienter_legerement_vers_ennemi_proche()
 
 	direction_attaque_verrouillee = -pivot_attaque.global_transform.basis.z.normalized()
 	velocity.x = direction_attaque_verrouillee.x * impulsion_counter

@@ -42,6 +42,7 @@ shape = SubResource("BoxShape3D_ibrh2")
 
 [node name="Joueur" parent="." unique_id=1970474225 instance=ExtResource("1_2ssnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+royaume_actuel = 10
 
 [node name="HUD" parent="." unique_id=1325857060 instance=ExtResource("2_u5tfm")]
 

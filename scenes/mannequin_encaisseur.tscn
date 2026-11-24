@@ -13,7 +13,7 @@ albedo_color = Color(0.7529412, 0.22352941, 0.16862746, 1)
 radius = 0.45
 height = 1.8
 
-[node name="MannequinEncaisseur" type="CharacterBody3D" unique_id=1833231801]
+[node name="MannequinEncaisseur" type="CharacterBody3D" unique_id=1833231801 groups=["ennemis"]]
 script = ExtResource("1_flmft")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2007911170]
