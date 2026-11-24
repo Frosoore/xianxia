@@ -24,13 +24,17 @@ signal royaume_modifie(nouveau_royaume: int)
 @export var degats_base : float = 20.0
 @export var degats_poise_base : float = 25.0
 @export var cout_endurance_attaque : float = 8.0
-@export var duree_attaque : float = 0.22
+@export var duree_attaque : float = 0.26          # Engagement (commitment) d'un coup normal
 @export var fenetre_combo : float = 0.8
 
 @export var fenetre_parry_permissive : float = 0.32 # Fenêtre généreuse façon Sekiro
 @export var fenetre_counter_swbf2 : float = 0.45    # Fenêtre après un blocage pour déclencher le counter
-@export var duree_counter_rapide : float = 0.11     # Attaque giga rapide
-@export var degats_poise_parry : float = 45.0       # Dégâts de posture infligés à l'attaquant sur un Parry
+@export var duree_counter_rapide : float = 0.11     # Engagement très court sur un Counter SWBF2
+@export var degats_poise_parry : float = 45.0
+
+@export var impulsion_attaque : float = 5.5       # Élan vers l'avant lors d'un coup
+@export var impulsion_finisher : float = 8.5      # Élan plus prononcé sur le 3ème coup
+@export var impulsion_counter : float = 2.5       # Faible déplacement sur un Counter
 
 # --- STATISTIQUES DE CULTIVATION ---
 @export_group("Cultivation & Combat")
@@ -63,6 +67,7 @@ var est_en_counter : bool = false
 var index_combo : int = 0
 var temps_derniere_attaque : float = -10.0
 var cibles_touchees_coup_actuel : Array = []
+var direction_attaque_verrouillee : Vector3 = Vector3.ZERO
 
 # États de Garde / Parry / Counter SWBF2
 var est_en_garde : bool = false
@@ -117,7 +122,7 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	# 3. Gestion de la Garde (Maintien du bouton bloquer)
+	# 3. Gestion de la Garde
 	gerer_garde(temps_actuel)
 
 	# 4. Double-Tap Dash (Dash Cancel autorisé à tout moment)
@@ -126,33 +131,32 @@ func _physics_process(delta: float) -> void:
 
 	# 5. Attaque ou Counter SWBF2
 	if Input.is_action_just_pressed("attaquer") and not est_en_dash:
-		# Si on maintient la garde ET qu'on vient de bloquer/parer un coup : COUNTER SWBF2 !
 		if est_en_garde and (temps_actuel - temps_dernier_coup_bloque <= fenetre_counter_swbf2):
 			declencher_counter_swbf2()
 		elif not est_en_attaque:
-			# Si on attaque normalement, la garde s'abaisse
 			est_en_garde = false
 			visuel_garde.visible = false
 			tenter_attaque()
 
-	# 6. Mouvement
+	# 6. Mouvement (Priorité : Dash > Engagement d'attaque > Déplacement libre)
 	if est_en_dash:
 		velocity.x = direction_dash.x * vitesse_dash
 		velocity.z = direction_dash.z * vitesse_dash
+	elif est_en_attaque:
+		velocity.x = move_toward(velocity.x, 0.0, 22.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 22.0 * delta)
 	else:
 		gerer_deplacement_normal()
 
 	move_and_slide()
 
 func gerer_garde(temps_actuel: float) -> void:
-	# On peut garder en permanence sauf pendant un dash ou une attaque normale (mais on garde pendant un Counter !)
 	var veut_bloquer : bool = Input.is_action_pressed("bloquer") and not est_en_dash and (not est_en_attaque or est_en_counter)
 	
 	if veut_bloquer and not est_en_garde:
 		est_en_garde = true
 		temps_debut_garde = temps_actuel
 		visuel_garde.visible = true
-		# Teinte blanche brillante pendant la fenêtre de Parry parfait
 		flash_fenetre_parry()
 	elif not veut_bloquer and est_en_garde:
 		est_en_garde = false
@@ -161,10 +165,10 @@ func gerer_garde(temps_actuel: float) -> void:
 func flash_fenetre_parry() -> void:
 	var mat := visuel_garde.material_override as StandardMaterial3D
 	if mat:
-		mat.albedo_color = Color(1.0, 1.0, 1.0, 0.8) # Éclat blanc pour visualiser la fenêtre Parry
+		mat.albedo_color = Color(1.0, 1.0, 1.0, 0.8)
 		await get_tree().create_timer(fenetre_parry_permissive).timeout
 		if est_en_garde and mat:
-			mat.albedo_color = Color(0.95, 0.77, 0.06, 0.45) # Retour au doré (blocage standard)
+			mat.albedo_color = Color(0.95, 0.77, 0.06, 0.45)
 
 func gerer_deplacement_normal() -> void:
 	if Input.is_action_just_pressed("sauter") and is_on_floor():
@@ -173,11 +177,7 @@ func gerer_deplacement_normal() -> void:
 	var input_dir := Input.get_vector("gauche", "droite", "avancer", "reculer")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	var vitesse_effective : float = vitesse
-	if est_en_garde and not est_en_counter:
-		vitesse_effective = vitesse * 0.55
-	elif est_en_attaque and not est_en_counter:
-		vitesse_effective = vitesse * 0.4
+	var vitesse_effective : float = vitesse * 0.55 if est_en_garde else vitesse
 	
 	if direction:
 		velocity.x = direction.x * vitesse_effective
@@ -277,6 +277,12 @@ func tenter_attaque() -> void:
 	est_en_counter = false
 	cibles_touchees_coup_actuel.clear()
 
+	# Verrouille la direction du coup et applique l'impulsion vers l'avant
+	direction_attaque_verrouillee = -pivot_attaque.global_transform.basis.z.normalized()
+	var elan : float = impulsion_finisher if index_combo == 3 else impulsion_attaque
+	velocity.x = direction_attaque_verrouillee.x * elan
+	velocity.z = direction_attaque_verrouillee.z * elan
+
 	hitbox_attaque.scale = Vector3(1.3, 1.0, 1.3) if index_combo == 3 else Vector3.ONE
 	hitbox_attaque.monitoring = true
 	visuel_slash.visible = true
@@ -288,25 +294,25 @@ func tenter_attaque() -> void:
 		visuel_slash.visible = false
 		est_en_attaque = false
 
-# --- MÉCANIQUE DE COUNTER FAÇON STAR WARS BATTLEFRONT II ---
 func declencher_counter_swbf2() -> void:
-	# Consomme la fenêtre de counter pour éviter le spam infini sur un seul blocage
 	temps_dernier_coup_bloque = -10.0
 	
 	est_en_attaque = true
 	est_en_counter = true
-	# IMPORTANT : est_en_garde reste TRUE et visuel_garde reste VISIBLE pendant tout le coup !
 	cibles_touchees_coup_actuel.clear()
 
-	# Visuel doré/blanc ultra rapide
+	direction_attaque_verrouillee = -pivot_attaque.global_transform.basis.z.normalized()
+	velocity.x = direction_attaque_verrouillee.x * impulsion_counter
+	velocity.z = direction_attaque_verrouillee.z * impulsion_counter
+
 	var mat_slash := visuel_slash.material_override as StandardMaterial3D
 	if mat_slash:
-		mat_slash.albedo_color = Color(1.0, 0.9, 0.2) # Éclair doré pour distinguer le Counter
+		mat_slash.albedo_color = Color(1.0, 0.9, 0.2)
 
 	hitbox_attaque.scale = Vector3.ONE
 	hitbox_attaque.monitoring = true
 	visuel_slash.visible = true
-	print(">>> COUNTER SWBF2 EXÉCUTÉ ! (Garde maintenue + Coup ultra-rapide quasi imblocable)")
+	print(">>> COUNTER SWBF2 EXÉCUTÉ !")
 
 	await get_tree().create_timer(duree_counter_rapide).timeout
 
@@ -316,11 +322,9 @@ func declencher_counter_swbf2() -> void:
 	est_en_counter = false
 	
 	if mat_slash:
-		mat_slash.albedo_color = Color(0.0, 0.85, 1.0) # Retour au cyan normal
+		mat_slash.albedo_color = Color(0.0, 0.85, 1.0)
 
-# --- RÉCEPTION DES DÉGÂTS (PARRY SEKIRO, BLOCAGE & POISE) ---
 func recevoir_degats(degats_pv: float, degats_poise: float, attaquant: Node3D) -> void:
-	# 1. iFrames du Dash
 	if est_invulnerable:
 		print("ESQUIVE PARFAITE (iFrames du Dash) !")
 		return
@@ -329,27 +333,21 @@ func recevoir_degats(degats_pv: float, degats_poise: float, attaquant: Node3D) -
 	var dir_recul : Vector3 = (global_position - attaquant.global_position).normalized()
 	dir_recul.y = 0.0
 
-	# 2. Gestion de la Garde (fonctionne aussi pendant un Counter SWBF2 !)
 	if est_en_garde:
-		temps_dernier_coup_bloque = temps_actuel # Ouvre la fenêtre de Counter SWBF2 !
-		
-		# Vérification du Parry Parfait (Sekiro)
+		temps_dernier_coup_bloque = temps_actuel
 		if temps_actuel - temps_debut_garde <= fenetre_parry_permissive:
-			print("PARRY PARFAIT (Sekiro) ! 0 dégât | +%.0f dégâts Poise renvoyés ! [Appuyez sur Attaquer pour Counter !]" % degats_poise_parry)
-			# Renvoie des dégâts de Poise massifs à l'attaquant
+			print("PARRY PARFAIT (Sekiro) !")
 			if attaquant.has_method("subir_degats_poise_parry"):
 				attaquant.subir_degats_poise_parry(degats_poise_parry)
 			return
 		else:
-			# Blocage Standard (garde levée depuis plus longtemps)
 			var cout_block : float = degats_poise * 0.6
 			endurance_actuelle = max(0.0, endurance_actuelle - cout_block)
 			endurance_modifiee.emit(endurance_actuelle, endurance_max)
-			velocity += dir_recul * 4.0 # Le fameux mini-recul qui permet de caler le Counter SWBF2 !
-			print("COUP BLOQUÉ ! Mini-recul subi | Endurance: %.0f [Appuyez sur Attaquer maintenant pour Counter !]" % endurance_actuelle)
+			velocity += dir_recul * 4.0
+			print("COUP BLOQUÉ ! Endurance: %.0f" % endurance_actuelle)
 			return
 
-	# 3. Impact direct (sans garde)
 	var degats_subis : float = degats_pv * (1.0 - reduction_degats)
 	pv_actuels -= degats_subis
 	poise_actuelle = max(0.0, poise_actuelle - degats_poise)
@@ -375,13 +373,11 @@ func _on_hitbox_attaque_body_entered(body: Node3D) -> void:
 
 	cibles_touchees_coup_actuel.append(body)
 
-	# Le Counter SWBF2 n'est pas boosté en dégâts (fidèle à votre demande), juste ultra rapide et quasi imblocable
 	var multiplicateur : float = 1.5 if (index_combo == 3 and not est_en_counter) else 1.0
 	var degats_finaux : float = degats_base * multiplicateur * (1.0 + (royaume_actuel - 1) * 0.5)
 	var degats_poise_finaux : float = degats_poise_base * multiplicateur
 
 	if body.has_method("recevoir_degats"):
-		# On transmet "est_en_counter" pour signaler que le coup est quasi imblocable
 		if body.has_method("recevoir_degats_avances"):
 			body.recevoir_degats_avances(degats_finaux, degats_poise_finaux, global_position, est_en_counter)
 		else:
