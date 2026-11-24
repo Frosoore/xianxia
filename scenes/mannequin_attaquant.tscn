@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://bvmbr7buk25ix"]
+
+[ext_resource type="Script" uid="uid://2ra7j2gmiaw1" path="res://scripts/mannequin_attaquant.gd" id="1_l4gbt"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dep2c"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibrh2"]
+albedo_color = Color(0.5568628, 0.26666668, 0.6784314, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_dep2c"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dep2c"]
+size = Vector3(2.2, 1.5, 2.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rd8ub"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dep2c"]
+size = Vector3(2.2, 0.15, 1.8)
+
+[node name="MannequinAttaquant" type="CharacterBody3D" unique_id=1954718402]
+script = ExtResource("1_l4gbt")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1895939924]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_dep2c")
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1618721494]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = SubResource("StandardMaterial3D_ibrh2")
+mesh = SubResource("CapsuleMesh_dep2c")
+
+[node name="Label3D" type="Label3D" parent="." unique_id=879457763]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.008
+billboard = 1
+text = "Mannequin Attaquant"
+
+[node name="ZoneAttaqueEnnemi" type="Area3D" parent="." unique_id=257453018]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneAttaqueEnnemi" unique_id=1829958130]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1.2)
+shape = SubResource("BoxShape3D_dep2c")
+
+[node name="VisuelCoupEnnemi" type="MeshInstance3D" parent="ZoneAttaqueEnnemi" unique_id=908223714]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1.2)
+visible = false
+material_override = SubResource("StandardMaterial3D_rd8ub")
+mesh = SubResource("BoxMesh_dep2c")

@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://d0ibm2n6628lb"]
+
+[ext_resource type="Script" uid="uid://cclspyo2te286" path="res://scripts/hud.gd" id="1_ahhtf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rd8ub"]
+bg_color = Color(0.16078432, 0.5019608, 0.7254902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ibrh2"]
+bg_color = Color(0.15294118, 0.68235296, 0.3764706, 1)
+
+[node name="HUD" type="Control" unique_id=1325857060]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ahhtf")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1771610431]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1143249684]
+layout_mode = 2
+
+[node name="LabelRoyaume" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1705470465]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Royaume 1 : Raffinement Corporel"
+
+[node name="BarreQi" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=152311005]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 22)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_rd8ub")
+show_percentage = false
+
+[node name="BarreEndurance" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=1513921941]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 18)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_ibrh2")
+show_percentage = false

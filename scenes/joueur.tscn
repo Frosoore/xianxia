@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://b17ia4vnx46k2"]
+
+[ext_resource type="Texture2D" uid="uid://g245y0h8j43u" path="res://icon.svg" id="1_r36ky"]
+[ext_resource type="Script" uid="uid://bcdm0ljpqnb3k" path="res://scripts/joueur.gd" id="1_uj1k6"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dep2c"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dep2c"]
+size = Vector3(1.8, 1.2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibrh2"]
+albedo_color = Color(0, 1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dep2c"]
+size = Vector3(1.8, 0.1, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rd8ub"]
+albedo_color = Color(0.94509804, 0.76862746, 0.05882353, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ibrh2"]
+size = Vector3(1.2, 1.4, 0.15)
+
+[node name="Joueur" type="CharacterBody3D" unique_id=626850313]
+script = ExtResource("1_uj1k6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=345256306]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9376369, 0)
+shape = SubResource("CapsuleShape3D_dep2c")
+
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1720361817]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9024497, 0)
+offset = Vector2(0, 0.65)
+shaded = true
+texture = ExtResource("1_r36ky")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=985185901]
+transform = Transform3D(1, 0, 0, 0, 0.9063078, 0.4226183, 0, -0.4226183, 0.9063078, 0, 5, 8)
+current = true
+
+[node name="PivotAttaque" type="Node3D" parent="." unique_id=953196289]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="HitboxAttaque" type="Area3D" parent="PivotAttaque" unique_id=1641464524]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PivotAttaque/HitboxAttaque" unique_id=1336727066]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+shape = SubResource("BoxShape3D_dep2c")
+
+[node name="VisuelSlash" type="MeshInstance3D" parent="PivotAttaque/HitboxAttaque" unique_id=164811893]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+material_override = SubResource("StandardMaterial3D_ibrh2")
+mesh = SubResource("BoxMesh_dep2c")
+
+[node name="VisuelGarde" type="MeshInstance3D" parent="PivotAttaque" unique_id=199255892]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.8)
+visible = false
+material_override = SubResource("StandardMaterial3D_rd8ub")
+transparency = 0.45
+mesh = SubResource("BoxMesh_ibrh2")

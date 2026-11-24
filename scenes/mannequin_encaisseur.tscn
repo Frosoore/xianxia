@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://ca6x16xktcwlg"]
+
+[ext_resource type="Script" uid="uid://duxk86lfjbv0c" path="res://scripts/mannequin_encaisseur.gd" id="1_flmft"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dep2c"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibrh2"]
+albedo_color = Color(0.7529412, 0.22352941, 0.16862746, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_dep2c"]
+radius = 0.45
+height = 1.8
+
+[node name="MannequinEncaisseur" type="CharacterBody3D" unique_id=1833231801]
+script = ExtResource("1_flmft")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2007911170]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_dep2c")
+debug_color = Color(0.7529412, 0.22352941, 0.16862746, 1)
+
+[node name="Label3D" type="Label3D" parent="." unique_id=811046228]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.008
+billboard = 1
+text = "PV: 200 | Poise: 100"
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1223760445]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = SubResource("StandardMaterial3D_ibrh2")
+mesh = SubResource("CapsuleMesh_dep2c")

@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://3fa12n0bdbo"]
+
+[ext_resource type="PackedScene" uid="uid://b17ia4vnx46k2" path="res://scenes/joueur.tscn" id="1_2ssnh"]
+[ext_resource type="PackedScene" uid="uid://ca6x16xktcwlg" path="res://scenes/mannequin_encaisseur.tscn" id="2_13bj3"]
+[ext_resource type="PackedScene" uid="uid://d0ibm2n6628lb" path="res://scenes/hud.tscn" id="2_u5tfm"]
+[ext_resource type="PackedScene" uid="uid://bvmbr7buk25ix" path="res://scenes/mannequin_attaquant.tscn" id="4_5o5ke"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eevbo"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_2ssnh"]
+sky_material = SubResource("ProceduralSkyMaterial_eevbo")
+
+[sub_resource type="Environment" id="Environment_u5tfm"]
+background_mode = 2
+sky = SubResource("Sky_2ssnh")
+glow_enabled = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_dep2c"]
+size = Vector3(30, 0.5, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ibrh2"]
+size = Vector3(30, 0.5, 30)
+
+[node name="Monde" type="Node3D" unique_id=1724505409]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2112209490]
+environment = SubResource("Environment_u5tfm")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=82616706]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Sol" type="StaticBody3D" parent="." unique_id=974450861]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Sol" unique_id=394531138]
+mesh = SubResource("BoxMesh_dep2c")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Sol" unique_id=1238787878]
+shape = SubResource("BoxShape3D_ibrh2")
+
+[node name="Joueur" parent="." unique_id=1970474225 instance=ExtResource("1_2ssnh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+
+[node name="HUD" parent="." unique_id=1325857060 instance=ExtResource("2_u5tfm")]
+
+[node name="MannequinEncaisseur" parent="." unique_id=1833231801 instance=ExtResource("2_13bj3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
+
+[node name="MannequinAttaquant" parent="." unique_id=1954718402 instance=ExtResource("4_5o5ke")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.25, 0)
+
+[connection signal="endurance_modifiee" from="Joueur" to="HUD" method="mettre_a_jour_endurance"]
+[connection signal="qi_modifie" from="Joueur" to="HUD" method="mettre_a_jour_qi"]
+[connection signal="royaume_modifie" from="Joueur" to="HUD" method="mettre_a_jour_royaume"]
