@@ -19,27 +19,27 @@ bg_color = Color(0.5568628, 0.26666668, 0.6784314, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
 bg_color = Color(0.08, 0.09, 0.14, 0.78)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 border_color = Color(0.45, 0.72, 0.9, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss_panel"]
 bg_color = Color(0.06, 0.04, 0.1, 0.82)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 border_color = Color(0.95, 0.75, 0.2, 0.85)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss_pv"]
 bg_color = Color(0.85, 0.12, 0.22, 1)
@@ -58,32 +58,35 @@ mouse_filter = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="RootControl" unique_id=1771610431]
 layout_mode = 0
-offset_right = 490.0
-offset_bottom = 270.0
+offset_right = 310.0
+offset_bottom = 145.0
 mouse_filter = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="RootControl/MarginContainer" unique_id=1143249684]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 3
 
 [node name="LabelRoyaume" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1705470465]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 11
 text = "Royaume 1 : Raffinement Corporel"
 
 [node name="LabelNiveauPuissance" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001008]
 unique_name_in_owner = true
 modulate = Color(1, 0.9, 0.55, 1)
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "Niv. 1  |  Puissance : 330"
 
 [node name="BarrePV" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001002]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 20)
+custom_minimum_size = Vector2(145, 10)
 layout_mode = 2
+size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_pv")
 value = 100.0
@@ -91,8 +94,9 @@ show_percentage = false
 
 [node name="BarrePoise" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001003]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 12)
+custom_minimum_size = Vector2(145, 6)
 layout_mode = 2
+size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_poise")
 value = 100.0
@@ -100,8 +104,9 @@ show_percentage = false
 
 [node name="BarreQi" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=152311005]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 20)
+custom_minimum_size = Vector2(145, 10)
 layout_mode = 2
+size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_rd8ub")
 value = 100.0
@@ -109,8 +114,9 @@ show_percentage = false
 
 [node name="BarreEndurance" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1513921941]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 16)
+custom_minimum_size = Vector2(145, 8)
 layout_mode = 2
+size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_ibrh2")
 value = 100.0
@@ -119,12 +125,14 @@ show_percentage = false
 [node name="LabelCultivation" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001005]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "Cultivation : 0 / 400"
 
 [node name="BarreCultivation" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001006]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 14)
+custom_minimum_size = Vector2(145, 7)
 layout_mode = 2
+size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_cultivation")
 show_percentage = false
@@ -132,7 +140,8 @@ show_percentage = false
 [node name="LabelAide" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001004]
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 2
-text = "[C] Méditer | [F] Percée | [V] Vol Épée | [L] +10 Niv | [T] Préparer | [PgUp/PgDn] Royaume | [F9] Changer Zone"
+theme_override_font_sizes/font_size = 9
+text = "[Ctrl] Lock + Molette Zoom | [C] Méditer | [F] Percée | [V] Vol | [L] +10 Niv | [T] Préparer | [PgUp/PgDn] R | [F9] Zone"
 
 [node name="PanneauBoss" type="PanelContainer" parent="RootControl" unique_id=1421001021]
 unique_name_in_owner = true
@@ -141,10 +150,10 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -270.0
-offset_top = 16.0
-offset_right = 270.0
-offset_bottom = 86.0
+offset_left = -140.0
+offset_top = 10.0
+offset_right = 140.0
+offset_bottom = 48.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_boss_panel")
@@ -152,17 +161,18 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_boss_panel")
 [node name="VBoxBoss" type="VBoxContainer" parent="RootControl/PanneauBoss" unique_id=1421001022]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="LabelNomBoss" type="Label" parent="RootControl/PanneauBoss/VBoxBoss" unique_id=1421001023]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 text = "BOSS"
 
 [node name="BarrePVBoss" type="ProgressBar" parent="RootControl/PanneauBoss/VBoxBoss" unique_id=1421001024]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(500, 18)
+custom_minimum_size = Vector2(260, 9)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_boss_pv")
@@ -171,7 +181,7 @@ show_percentage = false
 
 [node name="BarrePoiseBoss" type="ProgressBar" parent="RootControl/PanneauBoss/VBoxBoss" unique_id=1421001025]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(500, 8)
+custom_minimum_size = Vector2(260, 4)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_poise")
@@ -185,15 +195,73 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -460.0
-offset_top = 96.0
-offset_right = 460.0
-offset_bottom = 148.0
+offset_left = -300.0
+offset_top = 52.0
+offset_right = 300.0
+offset_bottom = 82.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 21
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 text = ""
+
+[node name="PanneauEtage" type="PanelContainer" parent="RootControl" unique_id=1421001026]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="VBoxEtage" type="VBoxContainer" parent="RootControl/PanneauEtage" unique_id=1421001027]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="LabelTitreEtage" type="Label" parent="RootControl/PanneauEtage/VBoxEtage" unique_id=1421001028]
+unique_name_in_owner = true
+modulate = Color(0.65, 1, 0.85, 1)
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 2
+text = "Étage 1 / 100 — Les Prairies de Jade Brumeux"
+
+[node name="LabelBoussole" type="Label" parent="RootControl/PanneauEtage/VBoxEtage" unique_id=1421001029]
+unique_name_in_owner = true
+modulate = Color(0.95, 0.92, 0.72, 1)
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 2
+text = "Boss : Nord (180m) | Autel : Est (120m)"
+
+[node name="ReticuleLock" type="Label" parent="RootControl" unique_id=1421001030]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0.55, 0.95, 1, 0.85)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "+"
 
 [node name="BarreSorts" type="HBoxContainer" parent="RootControl" unique_id=1421001010]
 layout_mode = 1
@@ -202,19 +270,19 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -350.0
-offset_top = -76.0
-offset_right = 350.0
-offset_bottom = -18.0
+offset_left = -195.0
+offset_top = -40.0
+offset_right = 195.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 5
 alignment = 1
 
 [node name="Slot1" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001011]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(126, 54)
+custom_minimum_size = Vector2(70, 28)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
@@ -222,13 +290,14 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
 [node name="LabelSlot1" type="Label" parent="RootControl/BarreSorts/Slot1" unique_id=1421001012]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "[1] Lame de Qi"
+text = "[1] Lame Qi"
 
 [node name="Slot2" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001013]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(126, 54)
+custom_minimum_size = Vector2(70, 28)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
@@ -236,13 +305,14 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
 [node name="LabelSlot2" type="Label" parent="RootControl/BarreSorts/Slot2" unique_id=1421001014]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "[2] Barrière (R2)"
+text = "[2] Barrière"
 
 [node name="Slot3" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001015]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(126, 54)
+custom_minimum_size = Vector2(70, 28)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
@@ -250,13 +320,14 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
 [node name="LabelSlot3" type="Label" parent="RootControl/BarreSorts/Slot3" unique_id=1421001016]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "[3] Foudre (R2)"
+text = "[3] Foudre"
 
 [node name="Slot4" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001017]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(142, 54)
+custom_minimum_size = Vector2(76, 28)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
@@ -264,13 +335,14 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
 [node name="LabelSlot4" type="Label" parent="RootControl/BarreSorts/Slot4" unique_id=1421001018]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "[4] Causal (R8)"
+text = "[4] Causal"
 
 [node name="SlotVol" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001019]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(126, 54)
+custom_minimum_size = Vector2(70, 28)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
@@ -278,6 +350,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
 [node name="LabelSlotVol" type="Label" parent="RootControl/BarreSorts/SlotVol" unique_id=1421001020]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "[V] Vol Épée (R4)"
+text = "[V] Vol"

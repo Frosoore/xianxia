@@ -38,6 +38,7 @@ signal skill_cast(slot: int, nom_sort: String, cooldown: float)
 signal skill_feedback(message: String, couleur: Color)
 signal elemental_synergy_triggered(nom_synergie: String, cible: Node)
 signal sword_flight_toggled(actif: bool)
+signal camera_lock_toggled(actif: bool)
 signal narrative_decree_triggered(texte_meta: String, duree: float)
 
 # --- BOSS & DISTORSION MÉTA-NARRATIVE (Lot 5) ---
@@ -45,3 +46,8 @@ signal boss_encounter_started(nom_boss: String, titre: String, pv: float, pv_max
 signal boss_status_updated(pv: float, pv_max: float, poise: float, poise_max: float, est_brise: bool)
 signal boss_encounter_ended()
 signal reality_distortion_triggered(message_meta: String, texte_hud_corrompu: String, duree: float)
+
+# --- TOUR DES 100 ÉTAGES DIMENSIONNELS ---
+signal floor_entered(numero_etage: int, nom_etage: String, sous_titre: String)
+signal floor_boss_defeated(numero_etage: int)
+signal floor_navigation_updated(pos_boss: Vector3, boss_vivant: bool, pos_autel: Vector3, pos_portail: Vector3)

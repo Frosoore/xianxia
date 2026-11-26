@@ -25,6 +25,7 @@ var degats_combo_total : float = 0.0
 var nb_coups_combo : int = 0
 var temps_depuis_dernier_coup : float = 0.0
 var _statut_action : String = ""
+var _en_preparation : bool = false
 
 const COULEUR_BASE_SPRITE := Color(0.92, 0.78, 1.15, 1.0)
 const COULEUR_TELEGRAPHE_SPRITE := Color(1.45, 0.55, 0.85, 1.0)
@@ -85,12 +86,16 @@ func boucle_attaque() -> void:
 		if not is_inside_tree() or est_brise:
 			continue
 
-		_statut_action = "PRÉPARE UN COUP..."
+		_en_preparation = true
+		_statut_action = "!! PRÉPARE UN COUP !!"
 		_mettre_a_jour_label()
-		if is_instance_valid(sprite_3d):
+		if is_instance_valid(animator_25d):
+			animator_25d.definir_teinte_etat(COULEUR_TELEGRAPHE_SPRITE)
+		elif is_instance_valid(sprite_3d):
 			sprite_3d.modulate = COULEUR_TELEGRAPHE_SPRITE
 		await get_tree().create_timer(0.45).timeout
 
+		_en_preparation = false
 		if not is_inside_tree() or est_brise:
 			continue
 
@@ -111,7 +116,9 @@ func boucle_attaque() -> void:
 		if not est_brise:
 			_statut_action = ""
 			_mettre_a_jour_label()
-			if is_instance_valid(sprite_3d):
+			if is_instance_valid(animator_25d):
+				animator_25d.definir_teinte_etat(COULEUR_BASE_SPRITE)
+			elif is_instance_valid(sprite_3d):
 				sprite_3d.modulate = COULEUR_BASE_SPRITE
 
 func _on_zone_attaque_body_entered(body: Node3D) -> void:
@@ -139,7 +146,8 @@ func subir_degats_poise_parry(degats_poise: float, _royaume_def: int = 1) -> voi
 	if est_brise:
 		return
 	poise_actuelle = maxf(0.0, poise_actuelle - degats_poise)
-	_statut_action = "PARÉ !"
+	if not _en_preparation:
+		_statut_action = "PARÉ !"
 	_mettre_a_jour_label()
 	if poise_actuelle <= 0.0:
 		declencher_brisure()
@@ -171,13 +179,16 @@ func declencher_brisure() -> void:
 	_id_brisure += 1
 	var id_local := _id_brisure
 
+	_en_preparation = false
 	est_brise = true
 	zone_attaque.monitoring = false
 	visuel_coup.visible = false
 	_statut_action = "[GARDE BRISÉE !]"
 	_mettre_a_jour_label()
 	EventBus.entity_guard_broken.emit(self)
-	if is_instance_valid(sprite_3d):
+	if is_instance_valid(animator_25d):
+		animator_25d.definir_teinte_etat(COULEUR_BRISEE_SPRITE)
+	elif is_instance_valid(sprite_3d):
 		sprite_3d.modulate = COULEUR_BRISEE_SPRITE
 
 	await get_tree().create_timer(duree_brisure_garde).timeout
@@ -188,7 +199,9 @@ func declencher_brisure() -> void:
 	poise_actuelle = poise_max
 	_statut_action = ""
 	_mettre_a_jour_label()
-	if is_instance_valid(sprite_3d):
+	if is_instance_valid(animator_25d):
+		animator_25d.definir_teinte_etat(COULEUR_BASE_SPRITE)
+	elif is_instance_valid(sprite_3d):
 		sprite_3d.modulate = COULEUR_BASE_SPRITE
 
 func _mettre_a_jour_label() -> void:

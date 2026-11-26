@@ -114,8 +114,11 @@ visible = false
 material_override = SubResource("StandardMaterial3D_epee")
 mesh = SubResource("BoxMesh_epee")
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=985185901]
-transform = Transform3D(1, 0, 0, 0, 0.9063078, 0.4226183, 0, -0.4226183, 0.9063078, 0, 5, 8)
+[node name="PivotCamera" type="Node3D" parent="." unique_id=1422001008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+
+[node name="Camera3D" type="Camera3D" parent="PivotCamera" unique_id=985185901]
+transform = Transform3D(1, 0, 0, 0, 0.9063078, 0.4226183, 0, -0.4226183, 0.9063078, 0, 3.45, 8)
 current = true
 
 [node name="PivotAttaque" type="Node3D" parent="." unique_id=953196289]

@@ -187,11 +187,13 @@ func _lancer_attaque() -> void:
 	_id_action += 1
 	var id_local : int = _id_action
 	etat = Etat.PREPARATION
-	_mettre_a_jour_label("!")
+	_mettre_a_jour_label()
 	if _materiau:
 		_materiau.albedo_color = couleur_telegraphe
-	if is_instance_valid(sprite_3d):
-		sprite_3d.modulate = Color(1.4, 0.75, 0.85, 1.0)
+	if is_instance_valid(animator_25d):
+		animator_25d.definir_teinte_etat(Color(1.45, 0.55, 0.72, 1.0))
+	elif is_instance_valid(sprite_3d):
+		sprite_3d.modulate = Color(1.45, 0.55, 0.72, 1.0)
 
 	await get_tree().create_timer(duree_telegraphe).timeout
 	if not is_inside_tree() or _id_action != id_local or etat != Etat.PREPARATION:
@@ -219,7 +221,9 @@ func _lancer_attaque() -> void:
 		etat = Etat.POURSUITE
 		if _materiau:
 			_materiau.albedo_color = couleur_normale
-		if is_instance_valid(sprite_3d):
+		if is_instance_valid(animator_25d):
+			animator_25d.definir_teinte_etat(Color.WHITE)
+		elif is_instance_valid(sprite_3d):
 			sprite_3d.modulate = Color.WHITE
 		_mettre_a_jour_label()
 
@@ -345,6 +349,8 @@ func _declencher_stagger(dir_recul: Vector3) -> void:
 
 	if _materiau:
 		_materiau.albedo_color = couleur_stagger
+	if is_instance_valid(animator_25d):
+		animator_25d.definir_teinte_etat(Color(1.25, 1.05, 0.45, 1.0))
 	EventBus.entity_guard_broken.emit(self)
 	_notifier_etat_ui()
 
@@ -356,6 +362,8 @@ func _declencher_stagger(dir_recul: Vector3) -> void:
 	poise_actuelle = poise_max
 	if _materiau:
 		_materiau.albedo_color = couleur_normale
+	if is_instance_valid(animator_25d):
+		animator_25d.definir_teinte_etat(Color.WHITE)
 	_notifier_etat_ui()
 
 func _flash_impact(couleur: Color) -> void:
@@ -418,7 +426,11 @@ func _mettre_a_jour_label(alerte: String = "") -> void:
 	if not is_node_ready():
 		return
 	var prefixe : String = "[R%d] %s" % [royaume_ennemi, nom_ennemi]
-	if alerte != "":
+	if etat == Etat.PREPARATION:
+		# L'indicateur d'attaque reste TOUJOURS visible tant que la préparation n'est pas brisée !
+		label_etat.text = "%s\n%s" % [prefixe, alerte if alerte != "" else "!! ATTAQUE IMMINENTE !!"]
+		label_etat.modulate = Color(1.0, 0.25, 0.48)
+	elif alerte != "":
 		label_etat.text = "%s\n%s" % [prefixe, alerte]
 		label_etat.modulate = Color(1.0, 0.35, 0.55)
 	elif etat == Etat.STAGGER:

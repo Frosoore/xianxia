@@ -41,7 +41,18 @@ extends CharacterBody3D
 @export_range(1, 10) var royaume_actuel : int = 1
 @export var delai_regen_poise : float = 2.5
 @export var vitesse_regen_poise : float = 25.0
+@export var drain_poise_garde_ratio_par_sec : float = 0.16 # Drain de 16% de la Poise max / sec en maintenant la garde
 @export var duree_brisure_garde : float = 1.2
+
+@export_group("Caméra & Lock Épaule (Ctrl)")
+@export var sensibilite_souris : float = 0.0032
+@export var offset_camera_epaule : Vector3 = Vector3(0.95, 0.48, 3.65)
+@export var offset_camera_normale : Vector3 = Vector3(0.0, 3.45, 8.0)
+@export var zoom_camera_lock : float = 1.0
+@export var zoom_camera_lock_min : float = 0.42
+@export var zoom_camera_lock_max : float = 4.5
+@export var pas_zoom_molette : float = 0.24
+@export var vitesse_transition_camera : float = 10.0
 
 # --- RÉFÉRENCES AUX NŒUDS ---
 @onready var stats: StatsComponent = $StatsComponent
@@ -52,7 +63,8 @@ extends CharacterBody3D
 @onready var aura_meditation: MeshInstance3D = $AuraMeditation
 @onready var barriere_qi: MeshInstance3D = $BarriereQi
 @onready var epee_volante: MeshInstance3D = $EpeeVolante
-@onready var camera: Camera3D = $Camera3D
+@onready var pivot_camera: Node3D = $PivotCamera
+@onready var camera: Camera3D = $PivotCamera/Camera3D
 @onready var pivot_attaque: Node3D = $PivotAttaque
 @onready var hitbox_attaque: Area3D = $PivotAttaque/HitboxAttaque
 @onready var visuel_slash: MeshInstance3D = $PivotAttaque/HitboxAttaque/VisuelSlash
@@ -68,6 +80,11 @@ var est_en_dash : bool = false
 var peut_dash : bool = true
 var direction_dash : Vector3 = Vector3.ZERO
 var est_en_vol_epee : bool = false
+
+# Caméra Lock Épaule Droite (Ctrl)
+var est_en_lock_camera : bool = false
+var yaw_camera : float = 0.0
+var pitch_camera : float = -0.08
 
 var est_en_attaque : bool = false
 var est_en_counter : bool = false
@@ -132,7 +149,36 @@ func _ready() -> void:
 
 	emettre_tous_les_signaux.call_deferred()
 
+func _exit_tree() -> void:
+	if est_en_lock_camera:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and est_en_lock_camera:
+		var m := event as InputEventMouseMotion
+		yaw_camera -= m.relative.x * sensibilite_souris
+		pitch_camera = clampf(pitch_camera - m.relative.y * sensibilite_souris, deg_to_rad(-42.0), deg_to_rad(28.0))
+		return
+
+	if event is InputEventMouseButton and est_en_lock_camera:
+		var mb := event as InputEventMouseButton
+		if mb.pressed:
+			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+				zoom_camera_lock = clampf(zoom_camera_lock - pas_zoom_molette, zoom_camera_lock_min, zoom_camera_lock_max)
+				return
+			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				zoom_camera_lock = clampf(zoom_camera_lock + pas_zoom_molette, zoom_camera_lock_min, zoom_camera_lock_max)
+				return
+
+	if event.is_action_pressed("lock_camera") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_CTRL):
+		basculer_lock_camera()
+		return
+
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if est_en_lock_camera:
+			basculer_lock_camera(false)
+		return
+
 	if event.is_action_pressed("mediter"):
 		if cultivation.est_en_meditation:
 			cultivation.arreter_meditation()
@@ -174,10 +220,49 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _basculer_scene_bac_a_sable() -> void:
 	var actuelle := get_tree().current_scene
-	var vers_vallee := actuelle != null and actuelle.scene_file_path.ends_with("monde.tscn")
-	var cible := "res://scenes/vallee_brume_emeraude.tscn" if vers_vallee else "res://scenes/monde.tscn"
+	var chemin : String = actuelle.scene_file_path if actuelle != null else ""
+	var cible : String = "res://scenes/floors/etage_01.tscn"
+	if chemin.ends_with("etage_01.tscn"):
+		cible = "res://scenes/vallee_brume_emeraude.tscn"
+	elif chemin.ends_with("vallee_brume_emeraude.tscn"):
+		cible = "res://scenes/monde.tscn"
 	Engine.time_scale = 1.0
 	get_tree().change_scene_to_file(cible)
+
+func basculer_lock_camera(forcer: Variant = null) -> void:
+	est_en_lock_camera = (not est_en_lock_camera) if forcer == null else bool(forcer)
+	if est_en_lock_camera:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		yaw_camera = pivot_attaque.rotation.y
+		pitch_camera = deg_to_rad(-6.0)
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	EventBus.camera_lock_toggled.emit(est_en_lock_camera)
+
+func _mettre_a_jour_camera(delta: float) -> void:
+	var t : float = clampf(delta * vitesse_transition_camera, 0.0, 1.0)
+	if est_en_lock_camera:
+		pivot_camera.rotation.y = lerp_angle(pivot_camera.rotation.y, yaw_camera, clampf(delta * 24.0, 0.0, 1.0))
+		pivot_camera.rotation.x = lerpf(pivot_camera.rotation.x, pitch_camera, clampf(delta * 24.0, 0.0, 1.0))
+		var ratio_z : float = clampf((zoom_camera_lock - zoom_camera_lock_min) / maxf(0.01, zoom_camera_lock_max - zoom_camera_lock_min), 0.0, 1.0)
+		var cible_epaule := Vector3(
+			offset_camera_epaule.x * lerpf(0.75, 1.45, ratio_z),
+			offset_camera_epaule.y * clampf(zoom_camera_lock * 0.95, 0.65, 2.6),
+			offset_camera_epaule.z * zoom_camera_lock
+		)
+		camera.position = camera.position.lerp(cible_epaule, t)
+		camera.rotation.x = lerpf(camera.rotation.x, deg_to_rad(-3.0), t)
+		if not est_en_attaque and not est_en_dash:
+			pivot_attaque.rotation.y = yaw_camera
+	else:
+		pivot_camera.rotation.y = lerp_angle(pivot_camera.rotation.y, 0.0, t)
+		pivot_camera.rotation.x = lerpf(pivot_camera.rotation.x, 0.0, t)
+		camera.position = camera.position.lerp(offset_camera_normale, t)
+		camera.rotation.x = lerpf(camera.rotation.x, deg_to_rad(-25.0), t)
+
+func _direction_relative_camera(input_2d: Vector2) -> Vector3:
+	var base_rot : Basis = Basis(Vector3.UP, yaw_camera) if est_en_lock_camera else transform.basis
+	return (base_rot * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 
 func basculer_vol_epee() -> void:
 	if est_en_vol_epee:
@@ -284,6 +369,7 @@ func secouer_camera(intensite: float = 0.2, duree: float = 0.2) -> void:
 
 func _physics_process(delta: float) -> void:
 	var temps_actuel : float = Time.get_ticks_msec() / 1000.0
+	_mettre_a_jour_camera(delta)
 
 	# 1. Régénérations passives & consommation du Vol sur Épée
 	var endurance_max := stats.get_endurance_max()
@@ -305,7 +391,15 @@ func _physics_process(delta: float) -> void:
 
 	temps_depuis_dernier_coup_subi += delta
 	var poise_max := stats.get_poise_max()
-	if not est_brise and temps_depuis_dernier_coup_subi >= delai_regen_poise and poise_actuelle < poise_max:
+	if est_en_garde and not est_brise:
+		# Maintenir la garde draine progressivement la Poise jusqu'à la brisure de garde !
+		temps_depuis_dernier_coup_subi = 0.0
+		poise_actuelle = maxf(0.0, poise_actuelle - poise_max * drain_poise_garde_ratio_par_sec * delta)
+		EventBus.player_poise_changed.emit(poise_actuelle, poise_max, est_brise)
+		if poise_actuelle <= 0.0:
+			print("POISE ÉPUISÉE EN GARDE !")
+			declencher_brisure_garde_joueur()
+	elif not est_brise and temps_depuis_dernier_coup_subi >= delai_regen_poise and poise_actuelle < poise_max:
 		poise_actuelle = minf(poise_max, poise_actuelle + stats.get_regen_poise(vitesse_regen_poise) * delta)
 		EventBus.player_poise_changed.emit(poise_actuelle, poise_max, est_brise)
 
@@ -383,7 +477,7 @@ func _physics_process(delta: float) -> void:
 
 func gerer_deplacement_vol(delta: float) -> void:
 	var input_dir := Input.get_vector("gauche", "droite", "avancer", "reculer")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var direction := _direction_relative_camera(input_dir)
 
 	var mult_vol := lerpf(2.2, 3.6, clampf((royaume_actuel - 4) / 6.0, 0.0, 1.0))
 	var vitesse_vol : float = vitesse * mult_vol * (0.6 if est_en_garde else 1.0)
@@ -391,11 +485,11 @@ func gerer_deplacement_vol(delta: float) -> void:
 	if direction:
 		velocity.x = move_toward(velocity.x, direction.x * vitesse_vol, acceleration * 1.4 * delta)
 		velocity.z = move_toward(velocity.z, direction.z * vitesse_vol, acceleration * 1.4 * delta)
-		var angle_cible : float = atan2(-direction.x, -direction.z)
-		pivot_attaque.rotation.y = lerp_angle(pivot_attaque.rotation.y, angle_cible, vitesse_rotation_pivot * delta)
-		var sprite := get_node_or_null("Sprite3D")
-		if sprite and input_dir.x != 0:
-			sprite.flip_h = input_dir.x < 0
+		if not est_en_lock_camera:
+			var angle_cible : float = atan2(-direction.x, -direction.z)
+			pivot_attaque.rotation.y = lerp_angle(pivot_attaque.rotation.y, angle_cible, vitesse_rotation_pivot * delta)
+		if is_instance_valid(sprite_3d) and input_dir.x != 0:
+			sprite_3d.flip_h = input_dir.x < 0
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friction * 0.8 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * 0.8 * delta)
@@ -403,7 +497,7 @@ func gerer_deplacement_vol(delta: float) -> void:
 	var dir_y := 0.0
 	if Input.is_action_pressed("sauter") and global_position.y < altitude_max_vol:
 		dir_y = 1.0
-	elif Input.is_key_pressed(KEY_SHIFT) or Input.is_key_pressed(KEY_CTRL):
+	elif Input.is_key_pressed(KEY_SHIFT):
 		dir_y = -1.0
 
 	if dir_y != 0.0:
@@ -442,7 +536,7 @@ func gerer_deplacement_normal(delta: float) -> void:
 		velocity.y = force_saut
 
 	var input_dir := Input.get_vector("gauche", "droite", "avancer", "reculer")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var direction := _direction_relative_camera(input_dir)
 
 	var vitesse_cible_max : float = vitesse * 0.55 if est_en_garde else vitesse
 
@@ -450,12 +544,12 @@ func gerer_deplacement_normal(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, direction.x * vitesse_cible_max, acceleration * delta)
 		velocity.z = move_toward(velocity.z, direction.z * vitesse_cible_max, acceleration * delta)
 
-		var angle_cible : float = atan2(-direction.x, -direction.z)
-		pivot_attaque.rotation.y = lerp_angle(pivot_attaque.rotation.y, angle_cible, vitesse_rotation_pivot * delta)
+		if not est_en_lock_camera:
+			var angle_cible : float = atan2(-direction.x, -direction.z)
+			pivot_attaque.rotation.y = lerp_angle(pivot_attaque.rotation.y, angle_cible, vitesse_rotation_pivot * delta)
 
-		var sprite := get_node_or_null("Sprite3D")
-		if sprite and input_dir.x != 0:
-			sprite.flip_h = input_dir.x < 0
+		if is_instance_valid(sprite_3d) and input_dir.x != 0:
+			sprite_3d.flip_h = input_dir.x < 0
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
@@ -513,7 +607,8 @@ func verifier_double_tap() -> void:
 			var ecart : float = temps_actuel - dernier_temps_appui[action]
 			if ecart <= fenetre_double_tap:
 				var dir_locale : Vector3 = correspondance_vecteurs[action]
-				var dir_monde : Vector3 = (transform.basis * dir_locale).normalized()
+				var base_rot : Basis = Basis(Vector3.UP, yaw_camera) if est_en_lock_camera else transform.basis
+				var dir_monde : Vector3 = (base_rot * dir_locale).normalized()
 				tenter_dash(dir_monde)
 				dernier_temps_appui[action] = -1.0
 			else:

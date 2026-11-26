@@ -19,6 +19,7 @@ var _timer_impact : float = 0.0
 var _en_l_air_precedent : bool = false
 var _squash_atterrissage : float = 0.0
 var _modulate_normal : Color = Color.WHITE
+var _id_flash : int = 0
 
 func initialiser(p_sprite: Sprite3D) -> void:
 	sprite = p_sprite
@@ -26,6 +27,11 @@ func initialiser(p_sprite: Sprite3D) -> void:
 		_pos_base = sprite.position
 		_scale_base = sprite.scale
 		_modulate_normal = sprite.modulate
+
+func definir_teinte_etat(couleur: Color) -> void:
+	_modulate_normal = couleur
+	if is_instance_valid(sprite):
+		sprite.modulate = couleur
 
 func jouer_coup(est_finisher: bool = false, est_counter: bool = false) -> void:
 	_timer_coup = 0.22 if est_finisher else 0.14
@@ -49,9 +55,11 @@ func jouer_impact(couleur: Color = Color(1.6, 1.6, 1.6, 1.0)) -> void:
 func _flash_couleur(couleur: Color, duree: float) -> void:
 	if not is_instance_valid(sprite):
 		return
+	_id_flash += 1
+	var id_local : int = _id_flash
 	sprite.modulate = couleur
 	await get_tree().create_timer(duree).timeout
-	if is_instance_valid(sprite):
+	if is_instance_valid(sprite) and _id_flash == id_local:
 		sprite.modulate = _modulate_normal
 
 func mettre_a_jour(
@@ -140,6 +148,11 @@ func mettre_a_jour(
 	sprite.position = sprite.position.lerp(cible_pos, taux)
 	sprite.scale = sprite.scale.lerp(cible_scale, taux)
 	sprite.rotation.z = lerpf(sprite.rotation.z, cible_rot_z, taux)
+
+	# Aligne l'axe Y du Sprite3D sur la caméra active pour ne jamais voir un sprite 2D sur la tranche
+	var cam := get_viewport().get_camera_3d()
+	if is_instance_valid(cam):
+		sprite.global_rotation.y = cam.global_rotation.y
 
 func _spawn_afterimage() -> void:
 	if not is_instance_valid(sprite) or sprite.texture == null:

@@ -15,6 +15,11 @@ extends CanvasLayer
 @onready var barre_pv_boss: ProgressBar = %BarrePVBoss
 @onready var barre_poise_boss: ProgressBar = %BarrePoiseBoss
 
+@onready var panneau_etage: PanelContainer = %PanneauEtage
+@onready var label_titre_etage: Label = %LabelTitreEtage
+@onready var label_boussole: Label = %LabelBoussole
+@onready var reticule_lock: Label = %ReticuleLock
+
 @onready var slot_panels: Dictionary = {
 	1: %Slot1, 2: %Slot2, 3: %Slot3, 4: %Slot4
 }
@@ -35,6 +40,11 @@ var _puissance_globale : float = 0.0
 var _vol_actif : bool = false
 var _cooldowns_fin_ms : Dictionary = {1: 0, 2: 0, 3: 0, 4: 0}
 var _nom_boss_actuel : String = ""
+var _nav_active : bool = false
+var _nav_pos_boss : Vector3 = Vector3.ZERO
+var _nav_boss_vivant : bool = true
+var _nav_pos_autel : Vector3 = Vector3.ZERO
+var _nav_pos_portail : Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	EventBus.player_realm_changed.connect(mettre_a_jour_royaume)
@@ -58,6 +68,7 @@ func _ready() -> void:
 	EventBus.skill_feedback.connect(_on_skill_feedback)
 	EventBus.elemental_synergy_triggered.connect(_on_elemental_synergy)
 	EventBus.sword_flight_toggled.connect(_on_sword_flight_toggled)
+	EventBus.camera_lock_toggled.connect(_on_camera_lock_toggled)
 	EventBus.narrative_decree_triggered.connect(_on_narrative_decree)
 
 	EventBus.boss_encounter_started.connect(_on_boss_started)
@@ -65,8 +76,13 @@ func _ready() -> void:
 	EventBus.boss_encounter_ended.connect(_on_boss_ended)
 	EventBus.reality_distortion_triggered.connect(_on_reality_distortion)
 
+	EventBus.floor_entered.connect(_on_floor_entered)
+	EventBus.floor_navigation_updated.connect(_on_floor_navigation_updated)
+
 func _process(_delta: float) -> void:
 	_rafraichir_barre_sorts()
+	if _nav_active:
+		_rafraichir_boussole()
 
 func mettre_a_jour_royaume(niveau: int, nom_affiche: String) -> void:
 	_royaume_actuel = niveau
@@ -180,6 +196,48 @@ func _on_boss_updated(pv: float, pv_max: float, poise: float, poise_max: float, 
 func _on_boss_ended() -> void:
 	panneau_boss.visible = false
 
+func _on_floor_entered(numero_etage: int, nom_etage: String, sous_titre: String) -> void:
+	panneau_etage.visible = true
+	label_titre_etage.text = "Étage %d / 100 — %s" % [numero_etage, nom_etage]
+	_afficher_banniere("ÉTAGE %d : %s — %s" % [numero_etage, nom_etage.to_upper(), sous_titre], Color(0.65, 1.0, 0.85), 4.0)
+
+func _on_floor_navigation_updated(pos_boss: Vector3, boss_vivant: bool, pos_autel: Vector3, pos_portail: Vector3) -> void:
+	_nav_active = true
+	_nav_pos_boss = pos_boss
+	_nav_boss_vivant = boss_vivant
+	_nav_pos_autel = pos_autel
+	_nav_pos_portail = pos_portail
+
+func _direction_cardinale(de: Vector3, vers: Vector3) -> String:
+	var dx : float = vers.x - de.x
+	var dz : float = vers.z - de.z
+	var dist : float = Vector2(dx, dz).length()
+	var dir_txt : String = ""
+	if dz < -4.0:
+		dir_txt += "N"
+	elif dz > 4.0:
+		dir_txt += "S"
+	if dx > 4.0:
+		dir_txt += "E"
+	elif dx < -4.0:
+		dir_txt += "O"
+	if dir_txt == "":
+		dir_txt = "Ici"
+	return "%s (%.0fm)" % [dir_txt, dist]
+
+func _rafraichir_boussole() -> void:
+	var j := get_tree().get_first_node_in_group("joueur")
+	if not is_instance_valid(j) or not (j is Node3D):
+		return
+	var pos_j : Vector3 = (j as Node3D).global_position
+	var cible_princ : String = (
+		"Seigneur : %s" % _direction_cardinale(pos_j, _nav_pos_boss)
+		if _nav_boss_vivant
+		else "Portail Étage 2 : %s" % _direction_cardinale(pos_j, _nav_pos_portail)
+	)
+	var autel_txt : String = "Autel : %s" % _direction_cardinale(pos_j, _nav_pos_autel)
+	label_boussole.text = "%s  |  %s" % [cible_princ, autel_txt]
+
 func _on_reality_distortion(message_meta: String, texte_hud_corrompu: String, duree: float) -> void:
 	_id_distorsion += 1
 	var id_local : int = _id_distorsion
@@ -218,7 +276,12 @@ func _on_sword_flight_toggled(actif: bool) -> void:
 	_vol_actif = actif
 	_rafraichir_barre_sorts()
 	if actif:
-		_afficher_banniere("VOL SUR ÉPÉE — [Espace] Monter | [Shift/Ctrl] Descendre", Color(0.35, 0.95, 1.0), 2.5)
+		_afficher_banniere("VOL SUR ÉPÉE — [Espace] Monter | [Shift] Descendre", Color(0.35, 0.95, 1.0), 2.5)
+
+func _on_camera_lock_toggled(actif: bool) -> void:
+	reticule_lock.visible = actif
+	if actif:
+		_afficher_banniere("LOCK CAMÉRA ÉPAULE — Souris pour viser | [Ctrl / Échap] Libérer", Color(0.55, 0.95, 1.0), 2.0)
 
 func _on_narrative_decree(texte_meta: String, duree: float) -> void:
 	_afficher_banniere(texte_meta, Color(1.0, 0.85, 0.2), duree)
