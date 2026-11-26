@@ -8,7 +8,7 @@ static func get_floor_data(numero: int) -> FloorData:
 	data.numero_etage = n
 	data.royaume_recommande = clampi(1 + int((n - 1) / 10), 1, 10)
 	data.niveau_recommande = maxi(1, int(pow(float(n), 1.35) * 1.15))
-	data.taille_dimension = 240.0
+	data.taille_dimension = 600.0
 
 	match n:
 		1:
