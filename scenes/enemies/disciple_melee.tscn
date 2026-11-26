@@ -1,12 +1,10 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/enemies/ennemi_base.gd" id="1_base"]
+[ext_resource type="Texture2D" path="res://assets/2d/characters/disciple_melee.png" id="2_tex"]
+[ext_resource type="Script" path="res://scripts/components/sprite_animator_25d.gd" id="3_anim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.42
-height = 1.75
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
 radius = 0.42
 height = 1.75
 
@@ -39,16 +37,23 @@ couleur_normale = Color(0.68, 0.18, 0.22, 1)
 recompense_xp = 90.0
 recompense_cultivation = 55.0
 
+[node name="SpriteAnimator25D" type="Node" parent="." unique_id=1425101008]
+script = ExtResource("3_anim")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425101002]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.88, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425101003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.88, 0)
-mesh = SubResource("CapsuleMesh_body")
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1425101003]
+offset = Vector2(0, 122)
+pixel_size = 0.0078125
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+texture = ExtResource("2_tex")
 
 [node name="Label3D" type="Label3D" parent="." unique_id=1425101004]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
 pixel_size = 0.0075
 billboard = 1
 text = "[R1] Disciple Démoniaque"

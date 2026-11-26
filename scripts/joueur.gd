@@ -47,6 +47,8 @@ extends CharacterBody3D
 @onready var stats: StatsComponent = $StatsComponent
 @onready var cultivation: CultivationComponent = $CultivationComponent
 @onready var skills: SkillsComponent = $SkillsComponent
+@onready var animator_25d: SpriteAnimator25D = $SpriteAnimator25D
+@onready var sprite_3d: Sprite3D = $Sprite3D
 @onready var aura_meditation: MeshInstance3D = $AuraMeditation
 @onready var barriere_qi: MeshInstance3D = $BarriereQi
 @onready var epee_volante: MeshInstance3D = $EpeeVolante
@@ -110,6 +112,7 @@ func _ready() -> void:
 		stats.definir_niveau_minimum(niv_init)
 	cultivation.initialiser(stats)
 	skills.initialiser(self, stats)
+	animator_25d.initialiser(sprite_3d)
 
 	pv_actuels = stats.get_pv_max()
 	endurance_actuelle = stats.get_endurance_max()
@@ -321,6 +324,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		move_and_slide()
+		animator_25d.mettre_a_jour(delta, velocity, is_on_floor(), false, false, false, false, true)
 		return
 
 	# 2.5 Mode Méditation Active
@@ -338,6 +342,7 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 			velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 			move_and_slide()
+			animator_25d.mettre_a_jour(delta, velocity, is_on_floor(), false, false, true, false, false)
 			return
 	else:
 		aura_meditation.visible = false
@@ -374,6 +379,7 @@ func _physics_process(delta: float) -> void:
 		gerer_deplacement_normal(delta)
 
 	move_and_slide()
+	animator_25d.mettre_a_jour(delta, velocity, is_on_floor(), est_en_dash, est_en_garde, false, est_en_vol_epee, est_brise)
 
 func gerer_deplacement_vol(delta: float) -> void:
 	var input_dir := Input.get_vector("gauche", "droite", "avancer", "reculer")
@@ -610,6 +616,7 @@ func tenter_attaque() -> void:
 	hitbox_attaque.scale = Vector3(s_xz, s_y, s_xz)
 	hitbox_attaque.monitoring = true
 	visuel_slash.visible = true
+	animator_25d.jouer_coup(index_combo == 3, false)
 
 	await get_tree().create_timer(stats.get_duree_attaque(duree_attaque)).timeout
 
@@ -642,6 +649,7 @@ func declencher_counter_swbf2() -> void:
 	hitbox_attaque.scale = Vector3(taille_c, maxf(1.0, taille_c * 0.65), taille_c)
 	hitbox_attaque.monitoring = true
 	visuel_slash.visible = true
+	animator_25d.jouer_coup(false, true)
 	print(">>> COUNTER SWBF2 EXÉCUTÉ !")
 
 	await get_tree().create_timer(stats.get_duree_attaque(duree_counter_rapide)).timeout
@@ -696,6 +704,7 @@ func recevoir_degats_info(info: DamageInfo) -> void:
 			else:
 				print("PARRY PARFAIT (Sekiro) !")
 			EventBus.parry_succeeded.emit(self, info.attaquant)
+			animator_25d.jouer_parry()
 			if is_instance_valid(info.attaquant) and info.attaquant.has_method("subir_degats_poise_parry"):
 				info.attaquant.subir_degats_poise_parry(stats.get_degats_poise(2.0), royaume_actuel)
 			return
@@ -724,6 +733,7 @@ func recevoir_degats_info(info: DamageInfo) -> void:
 	pv_actuels = maxf(0.0, pv_actuels - degats_subis)
 	EventBus.player_pv_changed.emit(pv_actuels, pv_max)
 	EventBus.entity_damaged.emit(self, info)
+	animator_25d.jouer_impact(Color(1.8, 0.7, 0.7, 1.0))
 
 	var poise_max := stats.get_poise_max()
 	if not est_brise and degats_poise_subis > 0.0:

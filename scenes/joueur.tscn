@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://b17ia4vnx46k2"]
 
-[ext_resource type="Texture2D" uid="uid://g245y0h8j43u" path="res://icon.svg" id="1_r36ky"]
+[ext_resource type="Texture2D" path="res://assets/2d/characters/joueur_cultivateur.png" id="1_r36ky"]
 [ext_resource type="Script" uid="uid://bcdm0ljpqnb3k" path="res://scripts/joueur.gd" id="1_uj1k6"]
 [ext_resource type="Script" path="res://scripts/components/stats_component.gd" id="3_stats"]
 [ext_resource type="Script" path="res://scripts/components/cultivation_component.gd" id="4_cultivation"]
 [ext_resource type="Script" path="res://scripts/components/skills_component.gd" id="5_skills"]
+[ext_resource type="Script" path="res://scripts/components/sprite_animator_25d.gd" id="6_anim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dep2c"]
 radius = 0.4
@@ -80,14 +81,19 @@ script = ExtResource("4_cultivation")
 [node name="SkillsComponent" type="Node" parent="." unique_id=1422001004]
 script = ExtResource("5_skills")
 
+[node name="SpriteAnimator25D" type="Node" parent="." unique_id=1422001007]
+script = ExtResource("6_anim")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=345256306]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9376369, 0)
 shape = SubResource("CapsuleShape3D_dep2c")
 
 [node name="Sprite3D" type="Sprite3D" parent="." unique_id=1720361817]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9024497, 0)
-offset = Vector2(0, 0.65)
+offset = Vector2(0, 128)
+pixel_size = 0.0078125
 shaded = true
+alpha_cut = 1
+texture_filter = 0
 texture = ExtResource("1_r36ky")
 
 [node name="AuraMeditation" type="MeshInstance3D" parent="." unique_id=1422001003]

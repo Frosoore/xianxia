@@ -1,6 +1,5 @@
 extends CharacterBody3D
-## Mannequin d'entraînement IMMORTEL : n'affiche pas de PV mais les dégâts subis (dernier coup, cumul combo, Poise)
-## et fait apparaître des chiffres de dégâts flottants 3D façon Dokkan Battle.
+## Mannequin d'entraînement IMMORTEL en bois (HD-2D Pixel Art) : affiche les dégâts pris + cumul + Poise.
 
 @export_group("Statistiques Mannequin")
 @export var poise_max : float = 100.0
@@ -10,7 +9,8 @@ extends CharacterBody3D
 @export var delai_reset_combo : float = 4.0
 
 @onready var label_etat: Label3D = $Label3D
-@onready var corps_mesh: MeshInstance3D = $CorpsMesh
+@onready var sprite_3d: Sprite3D = get_node_or_null("Sprite3D") as Sprite3D
+@onready var animator_25d: SpriteAnimator25D = get_node_or_null("SpriteAnimator25D") as SpriteAnimator25D
 
 var poise_actuelle : float = 100.0
 var est_brise : bool = false
@@ -19,18 +19,12 @@ var dernier_degat : float = 0.0
 var degats_combo_total : float = 0.0
 var nb_coups_combo : int = 0
 var gravite : float = ProjectSettings.get_setting("physics/3d/default_gravity")
-var materiau_corps : StandardMaterial3D
-
 var _id_brisure : int = 0
-var _id_flash : int = 0
-
-const COULEUR_NORMALE := Color(0.75, 0.22, 0.17)
-const COULEUR_BRISEE := Color(0.95, 0.75, 0.1)
 
 func _ready() -> void:
 	poise_actuelle = poise_max
-	if corps_mesh.material_override is StandardMaterial3D:
-		materiau_corps = corps_mesh.material_override
+	if is_instance_valid(animator_25d) and is_instance_valid(sprite_3d):
+		animator_25d.initialiser(sprite_3d)
 	EventBus.player_stats_recalculated.connect(_synchroniser_poise_sur_joueur)
 	EventBus.player_realm_changed.connect(func(_n: int, _t: String) -> void: _synchroniser_poise_sur_joueur())
 	_synchroniser_poise_sur_joueur.call_deferred()
@@ -64,6 +58,8 @@ func _physics_process(delta: float) -> void:
 		mettre_a_jour_affichage()
 
 	move_and_slide()
+	if is_instance_valid(animator_25d):
+		animator_25d.mettre_a_jour(delta, Vector3.ZERO, is_on_floor(), false, false, false, false, est_brise)
 
 func recevoir_degats_avances(degats_pv: float, degats_poise: float, position_attaquant: Vector3, est_counter: bool) -> void:
 	recevoir_degats_info(DamageInfo.creer(degats_pv, degats_poise, null, position_attaquant, est_counter))
@@ -91,30 +87,26 @@ func recevoir_degats_info(info: DamageInfo) -> void:
 	if not est_brise:
 		poise_actuelle = maxf(0.0, poise_actuelle - info.degats_poise)
 		velocity += dir_recul * 3.5
-
 		if poise_actuelle <= 0.0:
 			declencher_brisure_garde(dir_recul)
-		else:
-			flash_impact(Color(1.0, 1.0, 1.0))
+		elif is_instance_valid(animator_25d):
+			animator_25d.jouer_impact(Color(1.6, 1.6, 1.6, 1.0))
 	else:
 		velocity += dir_recul * 6.0
-		flash_impact(Color(1.0, 0.85, 0.0))
+		if is_instance_valid(animator_25d):
+			animator_25d.jouer_impact(Color(1.5, 1.3, 0.4, 1.0))
 
 	mettre_a_jour_affichage()
 
 func declencher_brisure_garde(dir_recul: Vector3) -> void:
 	_id_brisure += 1
-	_id_flash += 1
 	var id_local := _id_brisure
 
 	est_brise = true
 	velocity += dir_recul * 12.0
 	EventBus.entity_guard_broken.emit(self)
-	print("BRISURE DE GARDE (POISE BROKEN) !")
-
-	if materiau_corps:
-		materiau_corps.albedo_color = COULEUR_BRISEE
-
+	if is_instance_valid(sprite_3d):
+		sprite_3d.modulate = Color(1.25, 1.05, 0.45, 1.0)
 	mettre_a_jour_affichage()
 
 	await get_tree().create_timer(duree_brisure_garde).timeout
@@ -123,19 +115,9 @@ func declencher_brisure_garde(dir_recul: Vector3) -> void:
 
 	est_brise = false
 	poise_actuelle = poise_max
-	if materiau_corps:
-		materiau_corps.albedo_color = COULEUR_NORMALE
+	if is_instance_valid(sprite_3d):
+		sprite_3d.modulate = Color.WHITE
 	mettre_a_jour_affichage()
-
-func flash_impact(couleur_flash: Color) -> void:
-	if not materiau_corps:
-		return
-	_id_flash += 1
-	var id_local := _id_flash
-	materiau_corps.albedo_color = couleur_flash
-	await get_tree().create_timer(0.08).timeout
-	if _id_flash == id_local and materiau_corps:
-		materiau_corps.albedo_color = COULEUR_BRISEE if est_brise else COULEUR_NORMALE
 
 func mettre_a_jour_affichage() -> void:
 	var ligne_degats := "Coup : %s | Combo : %s (%d)" % [

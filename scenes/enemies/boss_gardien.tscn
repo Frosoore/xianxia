@@ -1,12 +1,10 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/enemies/boss_gardien.gd" id="1_boss"]
+[ext_resource type="Texture2D" path="res://assets/2d/characters/boss_gardien.png" id="2_tex"]
+[ext_resource type="Script" path="res://scripts/components/sprite_animator_25d.gd" id="3_anim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.85
-height = 2.9
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
 radius = 0.85
 height = 2.9
 
@@ -43,16 +41,24 @@ couleur_telegraphe = Color(0.3, 1, 0.65, 1)
 recompense_xp = 3500.0
 recompense_cultivation = 2000.0
 
+[node name="SpriteAnimator25D" type="Node" parent="." unique_id=1425401008]
+script = ExtResource("3_anim")
+amplitude_marche_y = 0.12
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425401002]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425401003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
-mesh = SubResource("CapsuleMesh_body")
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1425401003]
+offset = Vector2(0, 205)
+pixel_size = 0.0078125
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+texture = ExtResource("2_tex")
 
 [node name="Label3D" type="Label3D" parent="." unique_id=1425401004]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 0)
 pixel_size = 0.0085
 billboard = 1
 text = "[R4 BOSS] Gardien de la Brume d'Émeraude"

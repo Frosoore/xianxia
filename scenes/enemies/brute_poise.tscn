@@ -1,12 +1,10 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/enemies/ennemi_base.gd" id="1_base"]
+[ext_resource type="Texture2D" path="res://assets/2d/characters/brute_poise.png" id="2_tex"]
+[ext_resource type="Script" path="res://scripts/components/sprite_animator_25d.gd" id="3_anim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.72
-height = 2.4
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
 radius = 0.72
 height = 2.4
 
@@ -41,16 +39,24 @@ couleur_telegraphe = Color(1, 0.45, 0.1, 1)
 recompense_xp = 850.0
 recompense_cultivation = 420.0
 
+[node name="SpriteAnimator25D" type="Node" parent="." unique_id=1425301008]
+script = ExtResource("3_anim")
+amplitude_marche_y = 0.1
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425301002]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425301003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
-mesh = SubResource("CapsuleMesh_body")
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1425301003]
+offset = Vector2(0, 166)
+pixel_size = 0.0078125
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+texture = ExtResource("2_tex")
 
 [node name="Label3D" type="Label3D" parent="." unique_id=1425301004]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.85, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.95, 0)
 pixel_size = 0.008
 billboard = 1
 text = "[R3] Colosse de Fondation"

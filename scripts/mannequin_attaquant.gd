@@ -1,21 +1,21 @@
 extends CharacterBody3D
-## Mannequin Attaquant IMMORTEL : teste le Parry, le Block et le Counter tout en affichant les dégâts encaissés.
+## Mannequin Attaquant IMMORTEL (HD-2D Pixel Art) : teste le Parry, le Block et le Counter.
 
 @export var intervalle_attaque : float = 2.2
-@export var ratio_degats_pv_joueur : float = 0.16 # S'adapte à l'échelle Dokkan du joueur pour rester pertinent
+@export var ratio_degats_pv_joueur : float = 0.16
 @export var degats_poise_coup : float = 30.0
 @export var poise_max : float = 100.0
 @export var duree_brisure_garde : float = 2.0
 @export var delai_reset_combo : float = 4.0
 
-@onready var corps_mesh: MeshInstance3D = $CorpsMesh
+@onready var sprite_3d: Sprite3D = get_node_or_null("Sprite3D") as Sprite3D
+@onready var animator_25d: SpriteAnimator25D = get_node_or_null("SpriteAnimator25D") as SpriteAnimator25D
 @onready var label_etat: Label3D = $Label3D
 @onready var zone_attaque: Area3D = $ZoneAttaqueEnnemi
 @onready var visuel_coup: MeshInstance3D = %VisuelCoupEnnemi
 
 var poise_actuelle : float = 100.0
 var est_brise : bool = false
-var materiau : StandardMaterial3D
 var joueur_cible : Node3D = null
 var cibles_touchees_coup_actuel : Array = []
 var _id_brisure : int = 0
@@ -26,14 +26,16 @@ var nb_coups_combo : int = 0
 var temps_depuis_dernier_coup : float = 0.0
 var _statut_action : String = ""
 
-const COULEUR_NORMALE := Color(0.55, 0.26, 0.67)
-const COULEUR_TELEGRAPHE := Color(1.0, 0.2, 0.6)
-const COULEUR_BRISEE := Color(0.95, 0.75, 0.1)
+const COULEUR_BASE_SPRITE := Color(0.92, 0.78, 1.15, 1.0)
+const COULEUR_TELEGRAPHE_SPRITE := Color(1.45, 0.55, 0.85, 1.0)
+const COULEUR_BRISEE_SPRITE := Color(1.25, 1.05, 0.45, 1.0)
 
 func _ready() -> void:
 	poise_actuelle = poise_max
-	if corps_mesh.material_override is StandardMaterial3D:
-		materiau = corps_mesh.material_override
+	if is_instance_valid(sprite_3d):
+		sprite_3d.modulate = COULEUR_BASE_SPRITE
+	if is_instance_valid(animator_25d) and is_instance_valid(sprite_3d):
+		animator_25d.initialiser(sprite_3d)
 
 	zone_attaque.monitoring = false
 	visuel_coup.visible = false
@@ -61,15 +63,21 @@ func _physics_process(delta: float) -> void:
 			joueur_cible = get_parent().get_node_or_null("Joueur")
 
 	if is_instance_valid(joueur_cible) and not est_brise:
-		var cible_horizontale := Vector3(joueur_cible.global_position.x, global_position.y, joueur_cible.global_position.z)
-		if global_position.distance_to(cible_horizontale) > 0.1:
-			look_at(cible_horizontale, Vector3.UP)
+		var dir := Vector3(joueur_cible.global_position.x - global_position.x, 0.0, joueur_cible.global_position.z - global_position.z)
+		if dir.length_squared() > 0.01:
+			var dn := dir.normalized()
+			zone_attaque.rotation.y = atan2(-dn.x, -dn.z)
+			if is_instance_valid(sprite_3d) and absf(dn.x) > 0.12:
+				sprite_3d.flip_h = dn.x < 0.0
 
 	temps_depuis_dernier_coup += delta
 	if nb_coups_combo > 0 and temps_depuis_dernier_coup >= delai_reset_combo:
 		degats_combo_total = 0.0
 		nb_coups_combo = 0
 		_mettre_a_jour_label()
+
+	if is_instance_valid(animator_25d):
+		animator_25d.mettre_a_jour(delta, Vector3.ZERO, true, false, false, false, false, est_brise)
 
 func boucle_attaque() -> void:
 	while is_inside_tree():
@@ -79,8 +87,8 @@ func boucle_attaque() -> void:
 
 		_statut_action = "PRÉPARE UN COUP..."
 		_mettre_a_jour_label()
-		if materiau:
-			materiau.albedo_color = COULEUR_TELEGRAPHE
+		if is_instance_valid(sprite_3d):
+			sprite_3d.modulate = COULEUR_TELEGRAPHE_SPRITE
 		await get_tree().create_timer(0.45).timeout
 
 		if not is_inside_tree() or est_brise:
@@ -91,6 +99,8 @@ func boucle_attaque() -> void:
 		_mettre_a_jour_label()
 		zone_attaque.monitoring = true
 		visuel_coup.visible = true
+		if is_instance_valid(animator_25d):
+			animator_25d.jouer_coup(false, false)
 
 		await get_tree().create_timer(0.2).timeout
 
@@ -101,8 +111,8 @@ func boucle_attaque() -> void:
 		if not est_brise:
 			_statut_action = ""
 			_mettre_a_jour_label()
-			if materiau:
-				materiau.albedo_color = COULEUR_NORMALE
+			if is_instance_valid(sprite_3d):
+				sprite_3d.modulate = COULEUR_BASE_SPRITE
 
 func _on_zone_attaque_body_entered(body: Node3D) -> void:
 	if est_brise or body == self or body in cibles_touchees_coup_actuel:
@@ -145,9 +155,9 @@ func recevoir_degats_info(info: DamageInfo) -> void:
 
 	EventBus.entity_damaged.emit(self, info)
 	NumberFormatter.spawn_floating_damage(self, global_position, degats_effectifs, info.est_critique, info.est_counter, est_brise)
+	if is_instance_valid(animator_25d):
+		animator_25d.jouer_impact(Color(1.6, 1.6, 1.6, 1.0))
 
-	if info.est_counter:
-		print("Mannequin attaquant frappé par COUNTER SWBF2 : %s !" % NumberFormatter.format(degats_effectifs))
 	subir_degats_poise_parry(info.degats_poise)
 	_mettre_a_jour_label()
 
@@ -167,8 +177,8 @@ func declencher_brisure() -> void:
 	_statut_action = "[GARDE BRISÉE !]"
 	_mettre_a_jour_label()
 	EventBus.entity_guard_broken.emit(self)
-	if materiau:
-		materiau.albedo_color = COULEUR_BRISEE
+	if is_instance_valid(sprite_3d):
+		sprite_3d.modulate = COULEUR_BRISEE_SPRITE
 
 	await get_tree().create_timer(duree_brisure_garde).timeout
 	if not is_inside_tree() or _id_brisure != id_local:
@@ -178,8 +188,8 @@ func declencher_brisure() -> void:
 	poise_actuelle = poise_max
 	_statut_action = ""
 	_mettre_a_jour_label()
-	if materiau:
-		materiau.albedo_color = COULEUR_NORMALE
+	if is_instance_valid(sprite_3d):
+		sprite_3d.modulate = COULEUR_BASE_SPRITE
 
 func _mettre_a_jour_label() -> void:
 	var ligne_degats := "Coup : %s | Cumul : %s" % [

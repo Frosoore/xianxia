@@ -1,16 +1,10 @@
 [gd_scene format=3 uid="uid://bvmbr7buk25ix"]
 
 [ext_resource type="Script" uid="uid://2ra7j2gmiaw1" path="res://scripts/mannequin_attaquant.gd" id="1_l4gbt"]
+[ext_resource type="Texture2D" path="res://assets/2d/characters/mannequin_bois.png" id="2_tex"]
+[ext_resource type="Script" path="res://scripts/components/sprite_animator_25d.gd" id="3_anim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dep2c"]
-radius = 0.45
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibrh2"]
-resource_local_to_scene = true
-albedo_color = Color(0.5568628, 0.26666668, 0.6784314, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_dep2c"]
 radius = 0.45
 height = 1.8
 
@@ -19,6 +13,9 @@ size = Vector3(2.2, 1.5, 2.2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rd8ub"]
 albedo_color = Color(1, 0, 0, 1)
+emission_enabled = true
+emission = Color(1, 0.2, 0.2, 1)
+emission_energy_multiplier = 2.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_dep2c"]
 size = Vector3(2.2, 0.15, 1.8)
@@ -26,17 +23,24 @@ size = Vector3(2.2, 0.15, 1.8)
 [node name="MannequinAttaquant" type="CharacterBody3D" unique_id=1954718402 groups=["ennemis"]]
 script = ExtResource("1_l4gbt")
 
+[node name="SpriteAnimator25D" type="Node" parent="." unique_id=1427201001]
+script = ExtResource("3_anim")
+amplitude_respiration = 0.01
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1895939924]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_dep2c")
 
-[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1618721494]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("StandardMaterial3D_ibrh2")
-mesh = SubResource("CapsuleMesh_dep2c")
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1618721494]
+offset = Vector2(0, 122)
+pixel_size = 0.0078125
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+texture = ExtResource("2_tex")
 
 [node name="Label3D" type="Label3D" parent="." unique_id=879457763]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
 pixel_size = 0.008
 billboard = 1
 text = "Mannequin Attaquant"

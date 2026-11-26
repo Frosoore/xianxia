@@ -46,7 +46,9 @@ enum Etat {
 @export var recompense_xp : float = 80.0
 @export var recompense_cultivation : float = 45.0
 
-@onready var corps_mesh: MeshInstance3D = $CorpsMesh
+@onready var corps_mesh: MeshInstance3D = get_node_or_null("CorpsMesh") as MeshInstance3D
+@onready var sprite_3d: Sprite3D = get_node_or_null("Sprite3D") as Sprite3D
+@onready var animator_25d: SpriteAnimator25D = get_node_or_null("SpriteAnimator25D") as SpriteAnimator25D
 @onready var label_etat: Label3D = $Label3D
 @onready var zone_attaque: Area3D = $ZoneAttaque
 @onready var visuel_attaque: MeshInstance3D = $ZoneAttaque/VisuelAttaque
@@ -74,13 +76,17 @@ func _ready() -> void:
 	pv_actuels = pv_max
 	poise_actuelle = poise_max
 
-	if corps_mesh.material_override is StandardMaterial3D:
-		_materiau = (corps_mesh.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
-		corps_mesh.material_override = _materiau
-	else:
-		_materiau = StandardMaterial3D.new()
-		corps_mesh.material_override = _materiau
-	_materiau.albedo_color = couleur_normale
+	if is_instance_valid(corps_mesh):
+		if corps_mesh.material_override is StandardMaterial3D:
+			_materiau = (corps_mesh.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
+			corps_mesh.material_override = _materiau
+		else:
+			_materiau = StandardMaterial3D.new()
+			corps_mesh.material_override = _materiau
+		_materiau.albedo_color = couleur_normale
+
+	if is_instance_valid(animator_25d) and is_instance_valid(sprite_3d):
+		animator_25d.initialiser(sprite_3d)
 
 	zone_attaque.monitoring = false
 	visuel_attaque.visible = false
@@ -122,6 +128,8 @@ func _physics_process(delta: float) -> void:
 			velocity.z = move_toward(velocity.z, 0.0, 16.0 * delta)
 
 	move_and_slide()
+	if is_instance_valid(animator_25d):
+		animator_25d.mettre_a_jour(delta, velocity, is_on_floor(), false, false, false, false, etat == Etat.STAGGER)
 
 func _process_patrouille(delta: float) -> void:
 	if is_instance_valid(_joueur):
@@ -182,6 +190,8 @@ func _lancer_attaque() -> void:
 	_mettre_a_jour_label("!")
 	if _materiau:
 		_materiau.albedo_color = couleur_telegraphe
+	if is_instance_valid(sprite_3d):
+		sprite_3d.modulate = Color(1.4, 0.75, 0.85, 1.0)
 
 	await get_tree().create_timer(duree_telegraphe).timeout
 	if not is_inside_tree() or _id_action != id_local or etat != Etat.PREPARATION:
@@ -189,6 +199,8 @@ func _lancer_attaque() -> void:
 
 	etat = Etat.ATTAQUE
 	_cibles_touchees.clear()
+	if is_instance_valid(animator_25d):
+		animator_25d.jouer_coup(est_boss, false)
 
 	if est_distance:
 		_tirer_projectile_ennemi()
@@ -207,6 +219,8 @@ func _lancer_attaque() -> void:
 		etat = Etat.POURSUITE
 		if _materiau:
 			_materiau.albedo_color = couleur_normale
+		if is_instance_valid(sprite_3d):
+			sprite_3d.modulate = Color.WHITE
 		_mettre_a_jour_label()
 
 func _tirer_projectile_ennemi() -> void:
@@ -345,6 +359,8 @@ func _declencher_stagger(dir_recul: Vector3) -> void:
 	_notifier_etat_ui()
 
 func _flash_impact(couleur: Color) -> void:
+	if is_instance_valid(animator_25d):
+		animator_25d.jouer_impact(Color(1.6, 1.6, 1.6, 1.0) if etat != Etat.STAGGER else Color(1.4, 1.2, 0.5, 1.0))
 	if not _materiau:
 		return
 	_id_flash += 1
@@ -413,9 +429,13 @@ func _mettre_a_jour_label(alerte: String = "") -> void:
 		label_etat.modulate = Color(1.0, 1.0, 1.0)
 
 func _regarder_vers(cible_pos: Vector3) -> void:
-	var cible_h := Vector3(cible_pos.x, global_position.y, cible_pos.z)
-	if global_position.distance_to(cible_h) > 0.1:
-		look_at(cible_h, Vector3.UP)
+	var dir : Vector3 = _dir_horizontale(global_position, cible_pos)
+	if dir == Vector3.ZERO:
+		return
+	# Pivote la zone d'attaque (comme PivotAttaque du joueur) pour garder le Sprite3D HD-2D face caméra !
+	zone_attaque.rotation.y = atan2(-dir.x, -dir.z)
+	if is_instance_valid(sprite_3d) and absf(dir.x) > 0.12:
+		sprite_3d.flip_h = dir.x < 0.0
 
 func _distance_horizontale(a: Vector3, b: Vector3) -> float:
 	var d := Vector3(b.x - a.x, 0.0, b.z - a.z)
