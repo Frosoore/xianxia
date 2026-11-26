@@ -1,0 +1,64 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/ennemi_base.gd" id="1_base"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atk"]
+size = Vector3(1.2, 1.2, 1.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_slash"]
+size = Vector3(0.4, 0.4, 0.4)
+
+[node name="CultivateurDistance" type="CharacterBody3D" unique_id=1425201001 groups=["ennemis"]]
+script = ExtResource("1_base")
+nom_ennemi = "Érudit du Qi Corrompu"
+royaume_ennemi = 2
+pv_max = 1100.0
+poise_max = 420.0
+degats_pv = 140.0
+degats_poise = 180.0
+vitesse_deplacement = 3.8
+portee_aggro = 15.0
+portee_attaque = 11.0
+est_distance = true
+portee_recul_distance = 5.0
+vitesse_projectile = 18.0
+duree_telegraphe = 0.65
+cooldown_attaque = 2.0
+couleur_normale = Color(0.22, 0.35, 0.72, 1)
+couleur_telegraphe = Color(0.75, 0.3, 1, 1)
+recompense_xp = 240.0
+recompense_cultivation = 140.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425201002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425201003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Label3D" type="Label3D" parent="." unique_id=1425201004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+pixel_size = 0.0075
+billboard = 1
+text = "[R2] Érudit du Qi Corrompu"
+
+[node name="ZoneAttaque" type="Area3D" parent="." unique_id=1425201005]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneAttaque" unique_id=1425201006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1)
+shape = SubResource("BoxShape3D_atk")
+
+[node name="VisuelAttaque" type="MeshInstance3D" parent="ZoneAttaque" unique_id=1425201007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1)
+visible = false
+mesh = SubResource("BoxMesh_slash")

@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="RealmData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/realm_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+niveau = 5
+nom = "Âme Naissante"
+titre_cosmologique = "Briseur de Mondes"
+description = "Centaines de milliers à millions de dégâts, vol libre, dash gratuit. Tribulation de 9 Éclairs."
+niveau_requis = 90
+puissance_requise = 500000.0
+qi_cultivation_requis = 28000.0
+nb_eclairs_tribulation = 9
+difficulte_tribulation = 1.45
+a_epreuve_du_coeur = true
+pv_max_base = 950000.0
+qi_max_base = 650000.0
+regen_qi_base = 32000.0
+endurance_max_base = 190.0
+regen_endurance_base = 18.0
+poise_max_base = 300000.0
+multiplicateur_degats = 7500.0
+facteur_cout_dash = 0.0
+cooldown_dash = 0.35
+peut_marcher_sur_eau = true
+peut_voler_sur_epee = true
+peut_vol_libre = true
+puissance_destruction = 5

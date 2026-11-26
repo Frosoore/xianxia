@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/ennemi_base.gd" id="1_base"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.42
+height = 1.75
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.42
+height = 1.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atk"]
+size = Vector3(1.8, 1.3, 1.9)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slash"]
+albedo_color = Color(1, 0.2, 0.25, 1)
+emission_enabled = true
+emission = Color(1, 0.2, 0.25, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_slash"]
+size = Vector3(1.8, 0.14, 1.6)
+
+[node name="DiscipleMelee" type="CharacterBody3D" unique_id=1425101001 groups=["ennemis"]]
+script = ExtResource("1_base")
+nom_ennemi = "Disciple Démoniaque"
+royaume_ennemi = 1
+pv_max = 180.0
+poise_max = 75.0
+degats_pv = 24.0
+degats_poise = 25.0
+vitesse_deplacement = 4.8
+portee_aggro = 11.0
+portee_attaque = 2.3
+duree_telegraphe = 0.48
+cooldown_attaque = 1.4
+couleur_normale = Color(0.68, 0.18, 0.22, 1)
+recompense_xp = 90.0
+recompense_cultivation = 55.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425101002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.88, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425101003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.88, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Label3D" type="Label3D" parent="." unique_id=1425101004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.0075
+billboard = 1
+text = "[R1] Disciple Démoniaque"
+
+[node name="ZoneAttaque" type="Area3D" parent="." unique_id=1425101005]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneAttaque" unique_id=1425101006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1.2)
+shape = SubResource("BoxShape3D_atk")
+
+[node name="VisuelAttaque" type="MeshInstance3D" parent="ZoneAttaque" unique_id=1425101007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1.2)
+visible = false
+material_override = SubResource("StandardMaterial3D_slash")
+mesh = SubResource("BoxMesh_slash")

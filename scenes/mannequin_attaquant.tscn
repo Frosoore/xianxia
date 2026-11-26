@@ -7,6 +7,7 @@ radius = 0.45
 height = 1.8
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibrh2"]
+resource_local_to_scene = true
 albedo_color = Color(0.5568628, 0.26666668, 0.6784314, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_dep2c"]
@@ -22,7 +23,7 @@ albedo_color = Color(1, 0, 0, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_dep2c"]
 size = Vector3(2.2, 0.15, 1.8)
 
-[node name="MannequinAttaquant" type="CharacterBody3D" unique_id=1954718402]
+[node name="MannequinAttaquant" type="CharacterBody3D" unique_id=1954718402 groups=["ennemis"]]
 script = ExtResource("1_l4gbt")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1895939924]

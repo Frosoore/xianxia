@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"barriere_de_qi"
+nom = "Barrière de Qi"
+description = "Déploie un bouclier spirituel absorbant les dégâts et les Éclairs de Tribulation en échange de Qi."
+element = 5
+type_competence = 2
+royaume_requis = 2
+cout_qi = 25.0
+cout_endurance = 0.0
+cooldown = 3.0
+duree = 2.0
+degats_pv_base = 0.0
+degats_poise_base = 0.0
+rayon_zone = 1.6
+couleur_vfx = Color(0.95, 0.82, 0.25, 1)

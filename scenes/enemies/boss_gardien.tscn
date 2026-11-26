@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/boss_gardien.gd" id="1_boss"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.85
+height = 2.9
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.85
+height = 2.9
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atk"]
+size = Vector3(3.6, 2.0, 3.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slash"]
+albedo_color = Color(0.2, 1, 0.65, 1)
+emission_enabled = true
+emission = Color(0.2, 1, 0.65, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_slash"]
+size = Vector3(3.6, 0.25, 2.8)
+
+[node name="BossGardien" type="CharacterBody3D" unique_id=1425401001 groups=["ennemis"]]
+script = ExtResource("1_boss")
+nom_ennemi = "Gardien de la Brume d'Émeraude"
+titre_ennemi = "Seigneur du Sanctuaire (Noyau d'Or)"
+royaume_ennemi = 4
+est_boss = true
+pv_max = 180000.0
+poise_max = 45000.0
+degats_pv = 8500.0
+degats_poise = 18000.0
+vitesse_deplacement = 4.4
+portee_aggro = 14.0
+portee_attaque = 3.6
+duree_telegraphe = 0.6
+duree_hitbox = 0.28
+cooldown_attaque = 1.65
+couleur_normale = Color(0.1, 0.45, 0.35, 1)
+couleur_telegraphe = Color(0.3, 1, 0.65, 1)
+recompense_xp = 3500.0
+recompense_cultivation = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425401002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425401003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Label3D" type="Label3D" parent="." unique_id=1425401004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 0)
+pixel_size = 0.0085
+billboard = 1
+text = "[R4 BOSS] Gardien de la Brume d'Émeraude"
+
+[node name="ZoneAttaque" type="Area3D" parent="." unique_id=1425401005]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneAttaque" unique_id=1425401006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -1.9)
+shape = SubResource("BoxShape3D_atk")
+
+[node name="VisuelAttaque" type="MeshInstance3D" parent="ZoneAttaque" unique_id=1425401007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -1.9)
+visible = false
+material_override = SubResource("StandardMaterial3D_slash")
+mesh = SubResource("BoxMesh_slash")

@@ -2,6 +2,9 @@
 
 [ext_resource type="Texture2D" uid="uid://g245y0h8j43u" path="res://icon.svg" id="1_r36ky"]
 [ext_resource type="Script" uid="uid://bcdm0ljpqnb3k" path="res://scripts/joueur.gd" id="1_uj1k6"]
+[ext_resource type="Script" path="res://scripts/components/stats_component.gd" id="3_stats"]
+[ext_resource type="Script" path="res://scripts/components/cultivation_component.gd" id="4_cultivation"]
+[ext_resource type="Script" path="res://scripts/components/skills_component.gd" id="5_skills"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dep2c"]
 radius = 0.4
@@ -11,19 +14,71 @@ height = 1.8
 size = Vector3(1.8, 1.2, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibrh2"]
+resource_local_to_scene = true
 albedo_color = Color(0, 1, 1, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_dep2c"]
 size = Vector3(1.8, 0.1, 1.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rd8ub"]
+resource_local_to_scene = true
 albedo_color = Color(0.94509804, 0.76862746, 0.05882353, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ibrh2"]
 size = Vector3(1.2, 1.4, 0.15)
 
-[node name="Joueur" type="CharacterBody3D" unique_id=626850313]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aura"]
+resource_local_to_scene = true
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.25, 0.85, 1, 0.45)
+emission_enabled = true
+emission = Color(0.3, 0.9, 1, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_aura"]
+top_radius = 1.05
+bottom_radius = 1.05
+height = 0.25
+cap_top = false
+cap_bottom = false
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_barriere"]
+resource_local_to_scene = true
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(1, 0.85, 0.25, 0.28)
+emission_enabled = true
+emission = Color(1, 0.82, 0.2, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_barriere"]
+radius = 1.25
+height = 2.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_epee"]
+resource_local_to_scene = true
+albedo_color = Color(0.35, 0.95, 1, 1)
+emission_enabled = true
+emission = Color(0.25, 0.9, 1, 1)
+emission_energy_multiplier = 2.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_epee"]
+size = Vector3(0.32, 0.08, 2.2)
+
+[node name="Joueur" type="CharacterBody3D" unique_id=626850313 groups=["joueur"]]
 script = ExtResource("1_uj1k6")
+
+[node name="StatsComponent" type="Node" parent="." unique_id=1422001001]
+script = ExtResource("3_stats")
+
+[node name="CultivationComponent" type="Node" parent="." unique_id=1422001002]
+script = ExtResource("4_cultivation")
+
+[node name="SkillsComponent" type="Node" parent="." unique_id=1422001004]
+script = ExtResource("5_skills")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=345256306]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9376369, 0)
@@ -35,6 +90,24 @@ offset = Vector2(0, 0.65)
 shaded = true
 texture = ExtResource("1_r36ky")
 
+[node name="AuraMeditation" type="MeshInstance3D" parent="." unique_id=1422001003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+visible = false
+material_override = SubResource("StandardMaterial3D_aura")
+mesh = SubResource("CylinderMesh_aura")
+
+[node name="BarriereQi" type="MeshInstance3D" parent="." unique_id=1422001005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+visible = false
+material_override = SubResource("StandardMaterial3D_barriere")
+mesh = SubResource("SphereMesh_barriere")
+
+[node name="EpeeVolante" type="MeshInstance3D" parent="." unique_id=1422001006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+visible = false
+material_override = SubResource("StandardMaterial3D_epee")
+mesh = SubResource("BoxMesh_epee")
+
 [node name="Camera3D" type="Camera3D" parent="." unique_id=985185901]
 transform = Transform3D(1, 0, 0, 0, 0.9063078, 0.4226183, 0, -0.4226183, 0.9063078, 0, 5, 8)
 current = true
@@ -43,6 +116,7 @@ current = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 
 [node name="HitboxAttaque" type="Area3D" parent="PivotAttaque" unique_id=1641464524]
+monitoring = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PivotAttaque/HitboxAttaque" unique_id=1336727066]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
@@ -50,6 +124,7 @@ shape = SubResource("BoxShape3D_dep2c")
 
 [node name="VisuelSlash" type="MeshInstance3D" parent="PivotAttaque/HitboxAttaque" unique_id=164811893]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+visible = false
 material_override = SubResource("StandardMaterial3D_ibrh2")
 mesh = SubResource("BoxMesh_dep2c")
 

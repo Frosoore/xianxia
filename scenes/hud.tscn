@@ -2,46 +2,282 @@
 
 [ext_resource type="Script" uid="uid://cclspyo2te286" path="res://scripts/hud.gd" id="1_ahhtf"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pv"]
+bg_color = Color(0.7529412, 0.22352941, 0.16862746, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_poise"]
+bg_color = Color(0.9529412, 0.6117647, 0.07058824, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rd8ub"]
 bg_color = Color(0.16078432, 0.5019608, 0.7254902, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ibrh2"]
 bg_color = Color(0.15294118, 0.68235296, 0.3764706, 1)
 
-[node name="HUD" type="Control" unique_id=1325857060]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cultivation"]
+bg_color = Color(0.5568628, 0.26666668, 0.6784314, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
+bg_color = Color(0.08, 0.09, 0.14, 0.78)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.72, 0.9, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss_panel"]
+bg_color = Color(0.06, 0.04, 0.1, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.75, 0.2, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss_pv"]
+bg_color = Color(0.85, 0.12, 0.22, 1)
+
+[node name="HUD" type="CanvasLayer" unique_id=1325857060]
+script = ExtResource("1_ahhtf")
+
+[node name="RootControl" type="Control" parent="." unique_id=1421001001]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_ahhtf")
+mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1771610431]
+[node name="MarginContainer" type="MarginContainer" parent="RootControl" unique_id=1771610431]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 490.0
+offset_bottom = 270.0
+mouse_filter = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1143249684]
+[node name="VBoxContainer" type="VBoxContainer" parent="RootControl/MarginContainer" unique_id=1143249684]
 layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
 
-[node name="LabelRoyaume" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1705470465]
+[node name="LabelRoyaume" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1705470465]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Royaume 1 : Raffinement Corporel"
 
-[node name="BarreQi" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=152311005]
+[node name="LabelNiveauPuissance" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001008]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 22)
+modulate = Color(1, 0.9, 0.55, 1)
 layout_mode = 2
-theme_override_styles/fill = SubResource("StyleBoxFlat_rd8ub")
+text = "Niv. 1  |  Puissance : 330"
+
+[node name="BarrePV" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001002]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 20)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_pv")
+value = 100.0
 show_percentage = false
 
-[node name="BarreEndurance" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=1513921941]
+[node name="BarrePoise" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001003]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 18)
+custom_minimum_size = Vector2(280, 12)
 layout_mode = 2
-theme_override_styles/fill = SubResource("StyleBoxFlat_ibrh2")
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_poise")
+value = 100.0
 show_percentage = false
+
+[node name="BarreQi" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=152311005]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 20)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_rd8ub")
+value = 100.0
+show_percentage = false
+
+[node name="BarreEndurance" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1513921941]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 16)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_ibrh2")
+value = 100.0
+show_percentage = false
+
+[node name="LabelCultivation" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001005]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cultivation : 0 / 400"
+
+[node name="BarreCultivation" type="ProgressBar" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001006]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 14)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_cultivation")
+show_percentage = false
+
+[node name="LabelAide" type="Label" parent="RootControl/MarginContainer/VBoxContainer" unique_id=1421001004]
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 2
+text = "[C] Méditer | [F] Percée | [V] Vol Épée | [L] +10 Niv | [T] Préparer | [PgUp/PgDn] Royaume | [F9] Changer Zone"
+
+[node name="PanneauBoss" type="PanelContainer" parent="RootControl" unique_id=1421001021]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -270.0
+offset_top = 16.0
+offset_right = 270.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_boss_panel")
+
+[node name="VBoxBoss" type="VBoxContainer" parent="RootControl/PanneauBoss" unique_id=1421001022]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="LabelNomBoss" type="Label" parent="RootControl/PanneauBoss/VBoxBoss" unique_id=1421001023]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "BOSS"
+
+[node name="BarrePVBoss" type="ProgressBar" parent="RootControl/PanneauBoss/VBoxBoss" unique_id=1421001024]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 18)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_boss_pv")
+value = 100.0
+show_percentage = false
+
+[node name="BarrePoiseBoss" type="ProgressBar" parent="RootControl/PanneauBoss/VBoxBoss" unique_id=1421001025]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 8)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_poise")
+value = 100.0
+show_percentage = false
+
+[node name="LabelBanniere" type="Label" parent="RootControl" unique_id=1421001007]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -460.0
+offset_top = 96.0
+offset_right = 460.0
+offset_bottom = 148.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="BarreSorts" type="HBoxContainer" parent="RootControl" unique_id=1421001010]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -76.0
+offset_right = 350.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Slot1" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001011]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="LabelSlot1" type="Label" parent="RootControl/BarreSorts/Slot1" unique_id=1421001012]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "[1] Lame de Qi"
+
+[node name="Slot2" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001013]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="LabelSlot2" type="Label" parent="RootControl/BarreSorts/Slot2" unique_id=1421001014]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "[2] Barrière (R2)"
+
+[node name="Slot3" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001015]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="LabelSlot3" type="Label" parent="RootControl/BarreSorts/Slot3" unique_id=1421001016]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "[3] Foudre (R2)"
+
+[node name="Slot4" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001017]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(142, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="LabelSlot4" type="Label" parent="RootControl/BarreSorts/Slot4" unique_id=1421001018]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "[4] Causal (R8)"
+
+[node name="SlotVol" type="PanelContainer" parent="RootControl/BarreSorts" unique_id=1421001019]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="LabelSlotVol" type="Label" parent="RootControl/BarreSorts/SlotVol" unique_id=1421001020]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "[V] Vol Épée (R4)"

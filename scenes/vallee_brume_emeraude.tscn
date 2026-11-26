@@ -1,0 +1,313 @@
+[gd_scene format=3 uid="uid://c4ebnfpqrvib6"]
+
+[ext_resource type="PackedScene" uid="uid://b17ia4vnx46k2" path="res://scenes/joueur.tscn" id="1_joueur"]
+[ext_resource type="PackedScene" uid="uid://d0ibm2n6628lb" path="res://scenes/hud.tscn" id="2_hud"]
+[ext_resource type="Script" uid="uid://b0yajedig61nm" path="res://scripts/core/tribulation_manager.gd" id="3_trib"]
+[ext_resource type="PackedScene" path="res://scenes/autel_percee.tscn" id="4_autel"]
+[ext_resource type="PackedScene" path="res://scenes/objet_destructible.tscn" id="5_destr"]
+[ext_resource type="PackedScene" uid="uid://ca6x16xktcwlg" path="res://scenes/mannequin_encaisseur.tscn" id="6_m_enc"]
+[ext_resource type="PackedScene" uid="uid://bvmbr7buk25ix" path="res://scenes/mannequin_attaquant.tscn" id="7_m_atk"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/disciple_melee.tscn" id="8_disc"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/cultivateur_distance.tscn" id="9_dist"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/brute_poise.tscn" id="10_brute"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/boss_gardien.tscn" id="11_boss"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/entite_hors_recit.tscn" id="12_entite"]
+[ext_resource type="Script" uid="uid://brpojbr81w0t4" path="res://scripts/core/decor_destructible.gd" id="13_decor"]
+[ext_resource type="Script" uid="uid://mjeajwjvsa6" path="res://scripts/core/terrain_destructible.gd" id="14_terrain"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vallee"]
+sky_top_color = Color(0.16, 0.34, 0.36, 1)
+sky_horizon_color = Color(0.45, 0.68, 0.62, 1)
+ground_bottom_color = Color(0.08, 0.14, 0.12, 1)
+ground_horizon_color = Color(0.35, 0.54, 0.48, 1)
+
+[sub_resource type="Sky" id="Sky_vallee"]
+sky_material = SubResource("ProceduralSkyMaterial_vallee")
+
+[sub_resource type="Environment" id="Environment_vallee"]
+background_mode = 2
+sky = SubResource("Sky_vallee")
+glow_enabled = true
+glow_intensity = 0.6
+fog_enabled = true
+fog_light_color = Color(0.34, 0.58, 0.52, 1)
+fog_density = 0.014
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.018
+volumetric_fog_albedo = Color(0.45, 0.82, 0.7, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sol"]
+albedo_color = Color(0.2, 0.29, 0.25, 1)
+roughness = 0.88
+
+[sub_resource type="BoxMesh" id="BoxMesh_sol"]
+size = Vector3(84, 0.5, 84)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sol"]
+size = Vector3(84, 0.5, 84)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sanctuaire"]
+albedo_color = Color(0.24, 0.36, 0.32, 1)
+roughness = 0.65
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_sanctuaire"]
+top_radius = 10.5
+bottom_radius = 11.5
+height = 0.4
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_sanctuaire"]
+height = 0.4
+radius = 10.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_faille"]
+albedo_color = Color(0.07, 0.05, 0.12, 1)
+emission_enabled = true
+emission = Color(0.25, 0.1, 0.4, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_faille"]
+size = Vector3(16, 0.6, 16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_faille"]
+size = Vector3(16, 0.6, 16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pont"]
+size = Vector3(13, 0.4, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pont"]
+size = Vector3(13, 0.4, 3.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pilier"]
+albedo_color = Color(0.17, 0.25, 0.23, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_pilier"]
+size = Vector3(2.2, 8.5, 2.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pilier"]
+size = Vector3(2.2, 8.5, 2.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_linteau"]
+size = Vector3(22.4, 1.8, 2.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_linteau"]
+size = Vector3(22.4, 1.8, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_falaise"]
+albedo_color = Color(0.22, 0.26, 0.28, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_falaise"]
+size = Vector3(8, 7, 4.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_falaise"]
+size = Vector3(8, 7, 4.5)
+
+[node name="ValleeBrumeEmeraude" type="Node3D" unique_id=1426001000]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1426001001]
+environment = SubResource("Environment_vallee")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1426001002]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+light_color = Color(0.88, 0.98, 0.94, 1)
+light_energy = 1.15
+shadow_enabled = true
+
+[node name="SolVallee" type="StaticBody3D" parent="." unique_id=1426001003]
+script = ExtResource("14_terrain")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SolVallee" unique_id=1426001004]
+material_override = SubResource("StandardMaterial3D_sol")
+mesh = SubResource("BoxMesh_sol")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SolVallee" unique_id=1426001005]
+shape = SubResource("BoxShape3D_sol")
+
+[node name="SanctuaireGardien" type="StaticBody3D" parent="." unique_id=1426001006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -24)
+script = ExtResource("13_decor")
+nom_decor = "Dalle du Sanctuaire"
+royaume_requis = 5
+coups_pour_briser = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SanctuaireGardien" unique_id=1426001007]
+material_override = SubResource("StandardMaterial3D_sanctuaire")
+mesh = SubResource("CylinderMesh_sanctuaire")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SanctuaireGardien" unique_id=1426001008]
+shape = SubResource("CylinderShape3D_sanctuaire")
+
+[node name="IlotHorsRecit" type="StaticBody3D" parent="." unique_id=1426001009]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.2, -12)
+script = ExtResource("13_decor")
+nom_decor = "Îlot Hors-Récit"
+royaume_requis = 8
+coups_pour_briser = 4
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="IlotHorsRecit" unique_id=1426001010]
+material_override = SubResource("StandardMaterial3D_faille")
+mesh = SubResource("BoxMesh_faille")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="IlotHorsRecit" unique_id=1426001011]
+shape = SubResource("BoxShape3D_faille")
+
+[node name="RampeHorsRecit" type="StaticBody3D" parent="." unique_id=1426001012]
+transform = Transform3D(0.9612617, -0.27563736, 0, 0.27563736, 0.9612617, 0, 0, 0, 1, 10.5, 1.65, -12)
+script = ExtResource("13_decor")
+nom_decor = "Pont d'Obsidienne"
+royaume_requis = 6
+coups_pour_briser = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RampeHorsRecit" unique_id=1426001013]
+material_override = SubResource("StandardMaterial3D_faille")
+mesh = SubResource("BoxMesh_pont")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RampeHorsRecit" unique_id=1426001014]
+shape = SubResource("BoxShape3D_pont")
+
+[node name="Decors" type="Node3D" parent="." unique_id=1426001015]
+
+[node name="PilierNordOuest" type="StaticBody3D" parent="Decors" unique_id=1426001016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.25, -20)
+script = ExtResource("13_decor")
+nom_decor = "Pilier d'Émeraude"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Decors/PilierNordOuest" unique_id=1426001017]
+material_override = SubResource("StandardMaterial3D_pilier")
+mesh = SubResource("BoxMesh_pilier")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Decors/PilierNordOuest" unique_id=1426001018]
+shape = SubResource("BoxShape3D_pilier")
+
+[node name="PilierNordEst" type="StaticBody3D" parent="Decors" unique_id=1426001019]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4.25, -20)
+script = ExtResource("13_decor")
+nom_decor = "Pilier d'Émeraude"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Decors/PilierNordEst" unique_id=1426001020]
+material_override = SubResource("StandardMaterial3D_pilier")
+mesh = SubResource("BoxMesh_pilier")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Decors/PilierNordEst" unique_id=1426001021]
+shape = SubResource("BoxShape3D_pilier")
+
+[node name="ArcheSanctuaire" type="StaticBody3D" parent="Decors" unique_id=1426001042]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.2, -20)
+script = ExtResource("13_decor")
+nom_decor = "Arche du Sanctuaire"
+royaume_requis = 4
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Decors/ArcheSanctuaire" unique_id=1426001043]
+material_override = SubResource("StandardMaterial3D_pilier")
+mesh = SubResource("BoxMesh_linteau")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Decors/ArcheSanctuaire" unique_id=1426001044]
+shape = SubResource("BoxShape3D_linteau")
+
+[node name="FalaiseOuest" type="StaticBody3D" parent="Decors" unique_id=1426001045]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, -22, 3.5, 4)
+script = ExtResource("13_decor")
+nom_decor = "Falaise de la Vallée"
+royaume_requis = 5
+coups_pour_briser = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Decors/FalaiseOuest" unique_id=1426001046]
+material_override = SubResource("StandardMaterial3D_falaise")
+mesh = SubResource("BoxMesh_falaise")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Decors/FalaiseOuest" unique_id=1426001047]
+shape = SubResource("BoxShape3D_falaise")
+
+[node name="FalaiseNord" type="StaticBody3D" parent="Decors" unique_id=1426001048]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, -36)
+script = ExtResource("13_decor")
+nom_decor = "Paroi de Jade"
+royaume_requis = 5
+coups_pour_briser = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Decors/FalaiseNord" unique_id=1426001049]
+material_override = SubResource("StandardMaterial3D_falaise")
+mesh = SubResource("BoxMesh_falaise")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Decors/FalaiseNord" unique_id=1426001050]
+shape = SubResource("BoxShape3D_falaise")
+
+[node name="PanneauBienvenue" type="Label3D" parent="Decors" unique_id=1426001022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 13.5)
+pixel_size = 0.011
+billboard = 1
+modulate = Color(0.65, 1, 0.85, 1)
+text = "VALLÉE DE LA BRUME D'ÉMERAUDE (100% Décor Destructible)
+Nord : Sentier & Boss Gardien (R1 → R4) | Ouest : Autel de Percée
+Est (Rampe / Vol Épée) : Faille Hors-Récit (R9) | Droite : Mannequins"
+
+[node name="Joueur" parent="." unique_id=1426001023 instance=ExtResource("1_joueur")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 18)
+
+[node name="HUD" parent="." unique_id=1426001024 instance=ExtResource("2_hud")]
+
+[node name="TribulationManager" type="Node3D" parent="." unique_id=1426001025]
+script = ExtResource("3_trib")
+
+[node name="AutelPercee" parent="." unique_id=1426001026 instance=ExtResource("4_autel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.25, -10)
+
+[node name="ZoneEntrainement" type="Node3D" parent="." unique_id=1426001027]
+
+[node name="MannequinEncaisseur" parent="ZoneEntrainement" unique_id=1426001028 instance=ExtResource("6_m_enc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0.5, 16)
+
+[node name="MannequinAttaquant" parent="ZoneEntrainement" unique_id=1426001029 instance=ExtResource("7_m_atk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0.25, 22)
+
+[node name="Ennemis" type="Node3D" parent="." unique_id=1426001030]
+
+[node name="DiscipleMelee1" parent="Ennemis" unique_id=1426001031 instance=ExtResource("8_disc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.25, 5)
+
+[node name="DiscipleMelee2" parent="Ennemis" unique_id=1426001032 instance=ExtResource("8_disc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0.25, 3)
+
+[node name="CultivateurDistance" parent="Ennemis" unique_id=1426001033 instance=ExtResource("9_dist")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -6)
+
+[node name="BrutePoise" parent="Ennemis" unique_id=1426001034 instance=ExtResource("10_brute")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.25, -8)
+
+[node name="BossGardien" parent="Ennemis" unique_id=1426001035 instance=ExtResource("11_boss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -24)
+
+[node name="EntiteHorsRecit" parent="Ennemis" unique_id=1426001036 instance=ExtResource("12_entite")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.6, -12)
+
+[node name="Destructibles" type="Node3D" parent="." unique_id=1426001037]
+
+[node name="Caisse1" parent="Destructibles" unique_id=1426001038 instance=ExtResource("5_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.25, 14)
+nom_objet = "Caisse de Secte"
+couleur_objet = Color(0.58, 0.39, 0.22, 1)
+taille_objet = Vector3(1.2, 1.2, 1.2)
+
+[node name="Palissade1" parent="Destructibles" unique_id=1426001039 instance=ExtResource("5_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.25, -1)
+nom_objet = "Palissade Spirituelle"
+royaume_requis = 2
+couleur_objet = Color(0.42, 0.28, 0.16, 1)
+taille_objet = Vector3(2.4, 1.8, 0.7)
+
+[node name="Rocher1" parent="Destructibles" unique_id=1426001040 instance=ExtResource("5_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.25, -8)
+nom_objet = "Rocher d'Émeraude"
+royaume_requis = 3
+coups_pour_briser = 3
+couleur_objet = Color(0.32, 0.48, 0.44, 1)
+taille_objet = Vector3(2.2, 2.2, 2.2)
+
+[node name="Monolithe1" parent="Destructibles" unique_id=1426001041 instance=ExtResource("5_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.25, -16)
+nom_objet = "Monolithe d'Obsidienne"
+royaume_requis = 5
+coups_pour_briser = 3
+couleur_objet = Color(0.18, 0.12, 0.28, 1)
+taille_objet = Vector3(1.8, 3.2, 1.8)

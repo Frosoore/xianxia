@@ -4,6 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://ca6x16xktcwlg" path="res://scenes/mannequin_encaisseur.tscn" id="2_13bj3"]
 [ext_resource type="PackedScene" uid="uid://d0ibm2n6628lb" path="res://scenes/hud.tscn" id="2_u5tfm"]
 [ext_resource type="PackedScene" uid="uid://bvmbr7buk25ix" path="res://scenes/mannequin_attaquant.tscn" id="4_5o5ke"]
+[ext_resource type="Script" path="res://scripts/core/tribulation_manager.gd" id="5_tribulation"]
+[ext_resource type="PackedScene" path="res://scenes/autel_percee.tscn" id="6_autel"]
+[ext_resource type="PackedScene" path="res://scenes/objet_destructible.tscn" id="7_destr"]
+[ext_resource type="Script" path="res://scripts/core/terrain_destructible.gd" id="8_terrain"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eevbo"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -33,6 +37,8 @@ transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545
 shadow_enabled = true
 
 [node name="Sol" type="StaticBody3D" parent="." unique_id=974450861]
+script = ExtResource("8_terrain")
+royaume_requis_cratere = 4
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Sol" unique_id=394531138]
 mesh = SubResource("BoxMesh_dep2c")
@@ -42,9 +48,15 @@ shape = SubResource("BoxShape3D_ibrh2")
 
 [node name="Joueur" parent="." unique_id=1970474225 instance=ExtResource("1_2ssnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
-royaume_actuel = 10
+royaume_actuel = 1
 
 [node name="HUD" parent="." unique_id=1325857060 instance=ExtResource("2_u5tfm")]
+
+[node name="TribulationManager" type="Node3D" parent="." unique_id=1423001001]
+script = ExtResource("5_tribulation")
+
+[node name="AutelPercee" parent="." unique_id=1423001002 instance=ExtResource("6_autel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -6)
 
 [node name="MannequinEncaisseur" parent="." unique_id=1833231801 instance=ExtResource("2_13bj3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
@@ -52,6 +64,36 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
 [node name="MannequinAttaquant" parent="." unique_id=1954718402 instance=ExtResource("4_5o5ke")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.25, 0)
 
-[connection signal="endurance_modifiee" from="Joueur" to="HUD" method="mettre_a_jour_endurance"]
-[connection signal="qi_modifie" from="Joueur" to="HUD" method="mettre_a_jour_qi"]
-[connection signal="royaume_modifie" from="Joueur" to="HUD" method="mettre_a_jour_royaume"]
+[node name="ZoneDestruction" type="Node3D" parent="." unique_id=1424201000]
+
+[node name="CaisseMortelle" parent="ZoneDestruction" unique_id=1424201001 instance=ExtResource("7_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.25, 6)
+nom_objet = "Caisse en Bois"
+royaume_requis = 1
+coups_pour_briser = 2
+couleur_objet = Color(0.58, 0.39, 0.22, 1)
+taille_objet = Vector3(1.2, 1.2, 1.2)
+
+[node name="PalissadeBois" parent="ZoneDestruction" unique_id=1424201002 instance=ExtResource("7_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.25, 6)
+nom_objet = "Palissade Spirituelle"
+royaume_requis = 2
+coups_pour_briser = 2
+couleur_objet = Color(0.42, 0.28, 0.16, 1)
+taille_objet = Vector3(2.2, 1.7, 0.7)
+
+[node name="RocherFondation" parent="ZoneDestruction" unique_id=1424201003 instance=ExtResource("7_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.25, 6)
+nom_objet = "Rocher de Fondation"
+royaume_requis = 3
+coups_pour_briser = 3
+couleur_objet = Color(0.45, 0.47, 0.52, 1)
+taille_objet = Vector3(2.0, 2.0, 2.0)
+
+[node name="MonolitheAme" parent="ZoneDestruction" unique_id=1424201004 instance=ExtResource("7_destr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.25, 6)
+nom_objet = "Monolithe d'Obsidienne"
+royaume_requis = 5
+coups_pour_briser = 3
+couleur_objet = Color(0.18, 0.12, 0.28, 1)
+taille_objet = Vector3(1.8, 3.2, 1.8)

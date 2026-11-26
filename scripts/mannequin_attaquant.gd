@@ -1,9 +1,12 @@
 extends CharacterBody3D
+## Mannequin Attaquant IMMORTEL : teste le Parry, le Block et le Counter tout en affichant les dégâts encaissés.
 
 @export var intervalle_attaque : float = 2.2
-@export var degats_coup : float = 25.0
+@export var ratio_degats_pv_joueur : float = 0.16 # S'adapte à l'échelle Dokkan du joueur pour rester pertinent
 @export var degats_poise_coup : float = 30.0
 @export var poise_max : float = 100.0
+@export var duree_brisure_garde : float = 2.0
+@export var delai_reset_combo : float = 4.0
 
 @onready var corps_mesh: MeshInstance3D = $CorpsMesh
 @onready var label_etat: Label3D = $Label3D
@@ -14,89 +17,178 @@ var poise_actuelle : float = 100.0
 var est_brise : bool = false
 var materiau : StandardMaterial3D
 var joueur_cible : Node3D = null
+var cibles_touchees_coup_actuel : Array = []
+var _id_brisure : int = 0
+
+var dernier_degat : float = 0.0
+var degats_combo_total : float = 0.0
+var nb_coups_combo : int = 0
+var temps_depuis_dernier_coup : float = 0.0
+var _statut_action : String = ""
+
+const COULEUR_NORMALE := Color(0.55, 0.26, 0.67)
+const COULEUR_TELEGRAPHE := Color(1.0, 0.2, 0.6)
+const COULEUR_BRISEE := Color(0.95, 0.75, 0.1)
 
 func _ready() -> void:
 	poise_actuelle = poise_max
 	if corps_mesh.material_override is StandardMaterial3D:
 		materiau = corps_mesh.material_override
-	
+
+	zone_attaque.monitoring = false
+	visuel_coup.visible = false
 	zone_attaque.body_entered.connect(_on_zone_attaque_body_entered)
+	EventBus.player_stats_recalculated.connect(_synchroniser_poise_sur_joueur)
+	EventBus.player_realm_changed.connect(func(_n: int, _t: String) -> void: _synchroniser_poise_sur_joueur())
+	_synchroniser_poise_sur_joueur.call_deferred()
+	_mettre_a_jour_label()
 	boucle_attaque()
 
-func _physics_process(_delta: float) -> void:
-	# Cherche le joueur dans la scène pour toujours se tourner vers lui
-	if not joueur_cible:
+func _synchroniser_poise_sur_joueur() -> void:
+	var j := get_tree().get_first_node_in_group("joueur")
+	if is_instance_valid(j) and j.has_node("StatsComponent"):
+		var s := j.get_node("StatsComponent") as StatsComponent
+		if s:
+			var ratio := poise_actuelle / maxf(1.0, poise_max)
+			poise_max = s.get_poise_max() * 1.8
+			poise_actuelle = 0.0 if est_brise else poise_max * ratio
+			_mettre_a_jour_label()
+
+func _physics_process(delta: float) -> void:
+	if not is_instance_valid(joueur_cible):
 		joueur_cible = get_tree().get_first_node_in_group("joueur")
-		if not joueur_cible:
-			# Secours : cherche par nom dans la scène parente
+		if not joueur_cible and get_parent():
 			joueur_cible = get_parent().get_node_or_null("Joueur")
-			
-	if joueur_cible and not est_brise:
+
+	if is_instance_valid(joueur_cible) and not est_brise:
 		var cible_horizontale := Vector3(joueur_cible.global_position.x, global_position.y, joueur_cible.global_position.z)
 		if global_position.distance_to(cible_horizontale) > 0.1:
 			look_at(cible_horizontale, Vector3.UP)
 
+	temps_depuis_dernier_coup += delta
+	if nb_coups_combo > 0 and temps_depuis_dernier_coup >= delai_reset_combo:
+		degats_combo_total = 0.0
+		nb_coups_combo = 0
+		_mettre_a_jour_label()
+
 func boucle_attaque() -> void:
-	while true:
+	while is_inside_tree():
 		await get_tree().create_timer(intervalle_attaque).timeout
-		if est_brise:
-			continue
-			
-		# 1. Télégraphe (avertissement visuel avant le coup)
-		label_etat.text = "PRÉPARE UN COUP..."
-		if materiau:
-			materiau.albedo_color = Color(1.0, 0.2, 0.6) # Rose vif
-		await get_tree().create_timer(0.45).timeout
-		
-		if est_brise:
+		if not is_inside_tree() or est_brise:
 			continue
 
-		# 2. Exécution de l'attaque
-		label_etat.text = "ATTAQUE !"
+		_statut_action = "PRÉPARE UN COUP..."
+		_mettre_a_jour_label()
+		if materiau:
+			materiau.albedo_color = COULEUR_TELEGRAPHE
+		await get_tree().create_timer(0.45).timeout
+
+		if not is_inside_tree() or est_brise:
+			continue
+
+		cibles_touchees_coup_actuel.clear()
+		_statut_action = "ATTAQUE !"
+		_mettre_a_jour_label()
 		zone_attaque.monitoring = true
 		visuel_coup.visible = true
-		
+
 		await get_tree().create_timer(0.2).timeout
-		
+
+		if not is_inside_tree():
+			return
 		zone_attaque.monitoring = false
 		visuel_coup.visible = false
 		if not est_brise:
-			label_etat.text = "Poise: %.0f" % poise_actuelle
+			_statut_action = ""
+			_mettre_a_jour_label()
 			if materiau:
-				materiau.albedo_color = Color(0.55, 0.26, 0.67)
+				materiau.albedo_color = COULEUR_NORMALE
 
 func _on_zone_attaque_body_entered(body: Node3D) -> void:
-	if body != self and body.has_method("recevoir_degats"):
-		body.recevoir_degats(degats_coup, degats_poise_coup, self)
+	if est_brise or body == self or body in cibles_touchees_coup_actuel:
+		return
+	var degats_adaptes := 25.0
+	var poise_adaptee := degats_poise_coup
+	var royaume_adapte := 1
+	if body.has_node("StatsComponent"):
+		var stats := body.get_node("StatsComponent") as StatsComponent
+		if stats:
+			degats_adaptes = stats.get_pv_max() * ratio_degats_pv_joueur
+			poise_adaptee = stats.get_poise_max() * 0.55
+			royaume_adapte = stats.royaume_actuel
 
-# Appelé quand le joueur réussit un Parry Parfait (Sekiro)
-func subir_degats_poise_parry(degats_poise: float) -> void:
+	var info := DamageInfo.creer(degats_adaptes, poise_adaptee, self, global_position, false, royaume_adapte, SkillData.Element.NEUTRE, false, false, royaume_adapte)
+	if body.has_method("recevoir_degats_info"):
+		cibles_touchees_coup_actuel.append(body)
+		body.recevoir_degats_info(info)
+	elif body.has_method("recevoir_degats"):
+		cibles_touchees_coup_actuel.append(body)
+		body.recevoir_degats(degats_adaptes, poise_adaptee, self)
+
+func subir_degats_poise_parry(degats_poise: float, _royaume_def: int = 1) -> void:
 	if est_brise:
 		return
-	poise_actuelle = max(0.0, poise_actuelle - degats_poise)
-	label_etat.text = "PARÉ ! Poise: %.0f" % poise_actuelle
+	poise_actuelle = maxf(0.0, poise_actuelle - degats_poise)
+	_statut_action = "PARÉ !"
+	_mettre_a_jour_label()
 	if poise_actuelle <= 0.0:
 		declencher_brisure()
 
-# Appelé quand le joueur frappe le mannequin (y compris avec le Counter SWBF2)
-func recevoir_degats_avances(degats_pv: float, degats_poise: float, _pos: Vector3, est_counter: bool) -> void:
-	if est_counter:
-		print("Le mannequin a pris un COUNTER SWBF2 imblocable ! (-%.0f PV, -%.0f Poise)" % [degats_pv, degats_poise])
-	subir_degats_poise_parry(degats_poise)
+func recevoir_degats_info(info: DamageInfo) -> void:
+	temps_depuis_dernier_coup = 0.0
+	var mult_posture := 1.5 if est_brise else 1.0
+	var degats_effectifs := info.degats_pv * mult_posture
 
-func recevoir_degats(_degats_pv: float, degats_poise: float, _pos: Vector3) -> void:
-	subir_degats_poise_parry(degats_poise)
+	dernier_degat = degats_effectifs
+	degats_combo_total += degats_effectifs
+	nb_coups_combo += 1
+
+	EventBus.entity_damaged.emit(self, info)
+	NumberFormatter.spawn_floating_damage(self, global_position, degats_effectifs, info.est_critique, info.est_counter, est_brise)
+
+	if info.est_counter:
+		print("Mannequin attaquant frappé par COUNTER SWBF2 : %s !" % NumberFormatter.format(degats_effectifs))
+	subir_degats_poise_parry(info.degats_poise)
+	_mettre_a_jour_label()
+
+func recevoir_degats_avances(degats_pv: float, degats_poise: float, pos: Vector3, est_counter: bool) -> void:
+	recevoir_degats_info(DamageInfo.creer(degats_pv, degats_poise, null, pos, est_counter))
+
+func recevoir_degats(degats_pv: float, degats_poise: float, pos: Vector3) -> void:
+	recevoir_degats_info(DamageInfo.creer(degats_pv, degats_poise, null, pos, false))
 
 func declencher_brisure() -> void:
+	_id_brisure += 1
+	var id_local := _id_brisure
+
 	est_brise = true
 	zone_attaque.monitoring = false
 	visuel_coup.visible = false
-	label_etat.text = "[GARDE BRISÉE !]"
+	_statut_action = "[GARDE BRISÉE !]"
+	_mettre_a_jour_label()
+	EventBus.entity_guard_broken.emit(self)
 	if materiau:
-		materiau.albedo_color = Color(0.95, 0.75, 0.1)
-	await get_tree().create_timer(2.0).timeout
+		materiau.albedo_color = COULEUR_BRISEE
+
+	await get_tree().create_timer(duree_brisure_garde).timeout
+	if not is_inside_tree() or _id_brisure != id_local:
+		return
+
 	est_brise = false
 	poise_actuelle = poise_max
-	label_etat.text = "Poise: %.0f" % poise_actuelle
+	_statut_action = ""
+	_mettre_a_jour_label()
 	if materiau:
-		materiau.albedo_color = Color(0.55, 0.26, 0.67)
+		materiau.albedo_color = COULEUR_NORMALE
+
+func _mettre_a_jour_label() -> void:
+	var ligne_degats := "Coup : %s | Cumul : %s" % [
+		NumberFormatter.format(dernier_degat),
+		NumberFormatter.format(degats_combo_total)
+	]
+	if est_brise:
+		label_etat.text = "%s\n[GARDE BRISÉE !]" % ligne_degats
+	elif _statut_action != "":
+		label_etat.text = "%s\n%s (Poise : %s)" % [ligne_degats, _statut_action, NumberFormatter.format(poise_actuelle)]
+	else:
+		label_etat.text = "%s\nPoise : %s" % [ligne_degats, NumberFormatter.format(poise_actuelle)]

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="RealmData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/realm_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+niveau = 3
+nom = "Établissement de la Fondation"
+titre_cosmologique = "Maître de Secte"
+description = "Milliers de dégâts, barrière de Qi active, brise rochers et falaises. Tribulation de 3 Éclairs Célestes."
+niveau_requis = 25
+puissance_requise = 2500.0
+qi_cultivation_requis = 3500.0
+nb_eclairs_tribulation = 3
+difficulte_tribulation = 1.15
+pv_max_base = 7500.0
+qi_max_base = 5000.0
+regen_qi_base = 250.0
+endurance_max_base = 135.0
+regen_endurance_base = 12.0
+poise_max_base = 2400.0
+multiplicateur_degats = 55.0
+facteur_cout_dash = 0.5
+cooldown_dash = 0.55
+peut_marcher_sur_eau = true
+puissance_destruction = 3

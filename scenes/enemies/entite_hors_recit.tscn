@@ -1,0 +1,92 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/entite_hors_recit.gd" id="1_entite"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.9
+height = 3.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_corps"]
+albedo_color = Color(0.06, 0.04, 0.1, 1)
+emission_enabled = true
+emission = Color(0.45, 0.12, 0.75, 1)
+emission_energy_multiplier = 1.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_monolithe"]
+size = Vector3(1.1, 3.0, 1.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_anneau"]
+albedo_color = Color(1, 0.85, 0.25, 1)
+emission_enabled = true
+emission = Color(1, 0.85, 0.25, 1)
+emission_energy_multiplier = 3.5
+
+[sub_resource type="TorusMesh" id="TorusMesh_anneau"]
+inner_radius = 1.45
+outer_radius = 1.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atk"]
+size = Vector3(3.4, 2.2, 3.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slash"]
+albedo_color = Color(1, 0.85, 0.25, 1)
+emission_enabled = true
+emission = Color(1, 0.85, 0.25, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_slash"]
+size = Vector3(3.2, 0.2, 3.0)
+
+[node name="EntiteHorsRecit" type="CharacterBody3D" unique_id=1425501001 groups=["ennemis"]]
+script = ExtResource("1_entite")
+nom_ennemi = "Observateur de la Page Déchirée"
+titre_ennemi = "Entité Hors-Récit — Modèle la Réalité & le Narratif"
+royaume_ennemi = 9
+est_boss = true
+pv_max = 450000000000.0
+poise_max = 18000000000.0
+degats_pv = 4500000000.0
+degats_poise = 6000000000.0
+vitesse_deplacement = 5.2
+portee_aggro = 15.0
+portee_attaque = 4.2
+duree_telegraphe = 0.55
+duree_hitbox = 0.26
+cooldown_attaque = 1.5
+couleur_normale = Color(0.08, 0.04, 0.14, 1)
+couleur_telegraphe = Color(1, 0.82, 0.2, 1)
+recompense_xp = 250000.0
+recompense_cultivation = 500000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425501002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425501003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
+material_override = SubResource("StandardMaterial3D_corps")
+mesh = SubResource("BoxMesh_monolithe")
+
+[node name="AnneauCosmique" type="MeshInstance3D" parent="." unique_id=1425501008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+material_override = SubResource("StandardMaterial3D_anneau")
+mesh = SubResource("TorusMesh_anneau")
+
+[node name="Label3D" type="Label3D" parent="." unique_id=1425501004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 0)
+pixel_size = 0.0085
+billboard = 1
+text = "[R9 HORS-RÉCIT] Observateur de la Page Déchirée"
+
+[node name="ZoneAttaque" type="Area3D" parent="." unique_id=1425501005]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneAttaque" unique_id=1425501006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.0)
+shape = SubResource("BoxShape3D_atk")
+
+[node name="VisuelAttaque" type="MeshInstance3D" parent="ZoneAttaque" unique_id=1425501007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.0)
+visible = false
+material_override = SubResource("StandardMaterial3D_slash")
+mesh = SubResource("BoxMesh_slash")

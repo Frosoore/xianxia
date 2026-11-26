@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"rature_narrative"
+nom = "Décret de l'Auteur : Rature Narrative"
+description = "Altère directement la couche narrative de l'arène : suspend les lois physiques, efface les axiomes ennemis et déclenche un jugement hors-récit."
+element = 8
+type_competence = 5
+royaume_requis = 10
+cout_qi = 80000000000.0
+cout_endurance = 0.0
+cooldown = 15.0
+duree = 2.5
+degats_pv_base = 350.0
+degats_poise_base = 500.0
+portee = 40.0
+rayon_zone = 15.0
+bonus_destruction = 3
+couleur_vfx = Color(1, 0.85, 0.2, 1)

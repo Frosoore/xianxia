@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="RealmData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/realm_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+niveau = 7
+nom = "Raffinement du Vide"
+titre_cosmologique = "Entité Dimensionnelle"
+description = "Dizaines à centaines de millions de dégâts. Plie les dimensions supérieures et traverse la matière."
+niveau_requis = 220
+puissance_requise = 120000000.0
+qi_cultivation_requis = 200000.0
+nb_eclairs_tribulation = 18
+difficulte_tribulation = 1.75
+a_epreuve_du_coeur = true
+pv_max_base = 180000000.0
+qi_max_base = 120000000.0
+regen_qi_base = 6000000.0
+endurance_max_base = 265.0
+regen_endurance_base = 26.0
+poise_max_base = 55000000.0
+multiplicateur_degats = 1400000.0
+facteur_cout_dash = 0.0
+cooldown_dash = 0.19
+peut_marcher_sur_eau = true
+peut_voler_sur_epee = true
+peut_vol_libre = true
+peut_blink = true
+puissance_destruction = 7

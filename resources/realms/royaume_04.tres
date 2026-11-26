@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="RealmData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/realm_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+niveau = 4
+nom = "Noyau d'Or"
+titre_cosmologique = "Seigneur de Continent"
+description = "Dizaines de milliers de dégâts, Vol sur Épée (Sword Flying), Domaine mineur. Tribulation de 6 Éclairs."
+niveau_requis = 50
+puissance_requise = 35000.0
+qi_cultivation_requis = 10000.0
+nb_eclairs_tribulation = 6
+difficulte_tribulation = 1.3
+a_epreuve_du_coeur = true
+pv_max_base = 80000.0
+qi_max_base = 55000.0
+regen_qi_base = 2800.0
+endurance_max_base = 160.0
+regen_endurance_base = 15.0
+poise_max_base = 25000.0
+multiplicateur_degats = 600.0
+facteur_cout_dash = 0.2
+cooldown_dash = 0.45
+peut_marcher_sur_eau = true
+peut_voler_sur_epee = true
+puissance_destruction = 4

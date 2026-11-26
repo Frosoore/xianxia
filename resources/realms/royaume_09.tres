@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="RealmData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/realm_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+niveau = 9
+nom = "Grande Ascension"
+titre_cosmologique = "Souverain Axiomatique"
+description = "Dizaines de milliards de dégâts. Manipule les axiomes de la réalité et résiste à l'effacement narratif. 81 Éclairs."
+niveau_requis = 450
+puissance_requise = 30000000000.0
+qi_cultivation_requis = 1500000.0
+nb_eclairs_tribulation = 81
+difficulte_tribulation = 2.1
+a_epreuve_du_coeur = true
+pv_max_base = 32000000000.0
+qi_max_base = 25000000000.0
+regen_qi_base = 1250000000.0
+endurance_max_base = 360.0
+regen_endurance_base = 37.0
+poise_max_base = 9000000000.0
+multiplicateur_degats = 220000000.0
+facteur_cout_dash = 0.0
+cooldown_dash = 0.08
+peut_marcher_sur_eau = true
+peut_voler_sur_epee = true
+peut_vol_libre = true
+peut_blink = true
+puissance_destruction = 9

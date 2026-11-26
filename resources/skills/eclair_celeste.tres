@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"eclair_celeste"
+nom = "Foudre du Ciel"
+description = "Déchaîne une onde d'éclair autour du cultivateur, infligeant de lourds dégâts de Poise."
+element = 3
+type_competence = 1
+royaume_requis = 2
+cout_qi = 35.0
+cout_endurance = 0.0
+cooldown = 4.0
+duree = 0.35
+degats_pv_base = 40.0
+degats_poise_base = 55.0
+rayon_zone = 3.5
+bonus_destruction = 1
+couleur_vfx = Color(0.65, 0.55, 1, 1)

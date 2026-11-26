@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="RealmData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/realm_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+niveau = 6
+nom = "Transformation de la Divinité"
+titre_cosmologique = "Souverain Stellaire"
+description = "Millions à dizaines de millions de dégâts, Blink spatial, déchire l'espace-temps. 12 Éclairs."
+niveau_requis = 150
+puissance_requise = 8000000.0
+qi_cultivation_requis = 75000.0
+nb_eclairs_tribulation = 12
+difficulte_tribulation = 1.6
+a_epreuve_du_coeur = true
+pv_max_base = 12000000.0
+qi_max_base = 8500000.0
+regen_qi_base = 420000.0
+endurance_max_base = 225.0
+regen_endurance_base = 22.0
+poise_max_base = 4000000.0
+multiplicateur_degats = 100000.0
+facteur_cout_dash = 0.0
+cooldown_dash = 0.26
+peut_marcher_sur_eau = true
+peut_voler_sur_epee = true
+peut_vol_libre = true
+peut_blink = true
+puissance_destruction = 6

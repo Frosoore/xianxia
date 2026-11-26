@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"lame_de_qi"
+nom = "Lame de Qi"
+description = "Projette un arc tranchant de Qi condensé vers l'avant. Peut briser les obstacles selon le Royaume."
+element = 4
+type_competence = 0
+royaume_requis = 1
+cout_qi = 18.0
+cout_endurance = 5.0
+cooldown = 1.2
+duree = 0.2
+degats_pv_base = 28.0
+degats_poise_base = 20.0
+portee = 14.0
+vitesse_projectile = 22.0
+bonus_destruction = 1
+couleur_vfx = Color(0.25, 0.9, 1, 1)

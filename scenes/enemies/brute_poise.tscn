@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/ennemi_base.gd" id="1_base"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.72
+height = 2.4
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.72
+height = 2.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atk"]
+size = Vector3(3.0, 1.8, 2.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slash"]
+albedo_color = Color(1, 0.45, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.45, 0.1, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_slash"]
+size = Vector3(3.0, 0.25, 2.5)
+
+[node name="BrutePoise" type="CharacterBody3D" unique_id=1425301001 groups=["ennemis"]]
+script = ExtResource("1_base")
+nom_ennemi = "Colosse de Fondation"
+royaume_ennemi = 3
+pv_max = 12000.0
+poise_max = 5500.0
+degats_pv = 1200.0
+degats_poise = 2200.0
+vitesse_deplacement = 3.0
+portee_aggro = 12.0
+portee_attaque = 3.1
+duree_telegraphe = 0.78
+duree_hitbox = 0.28
+cooldown_attaque = 2.2
+couleur_normale = Color(0.45, 0.42, 0.38, 1)
+couleur_telegraphe = Color(1, 0.45, 0.1, 1)
+recompense_xp = 850.0
+recompense_cultivation = 420.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1425301002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="CorpsMesh" type="MeshInstance3D" parent="." unique_id=1425301003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Label3D" type="Label3D" parent="." unique_id=1425301004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.85, 0)
+pixel_size = 0.008
+billboard = 1
+text = "[R3] Colosse de Fondation"
+
+[node name="ZoneAttaque" type="Area3D" parent="." unique_id=1425301005]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZoneAttaque" unique_id=1425301006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -1.6)
+shape = SubResource("BoxShape3D_atk")
+
+[node name="VisuelAttaque" type="MeshInstance3D" parent="ZoneAttaque" unique_id=1425301007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -1.6)
+visible = false
+material_override = SubResource("StandardMaterial3D_slash")
+mesh = SubResource("BoxMesh_slash")
